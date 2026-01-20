@@ -2,24 +2,31 @@
 import React, { useState, useMemo } from 'react';
 import { MENU_ITEMS } from '../constants';
 import { SubCategory, FullPlannerState, MenuItem, DailyMenu } from '../types';
-import { 
-  Calendar as CalendarIcon, 
-  Plus, 
-  Trash2, 
-  Download, 
-  ChevronLeft, 
-  ChevronRight, 
-  X, 
-  Search, 
-  Zap, 
-  Ticket 
+import {
+  Calendar as CalendarIcon,
+  Plus,
+  Trash2,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Search,
+  Zap,
+  Ticket
 } from 'lucide-react';
 
 const SUB_CATEGORIES: SubCategory[] = ['Zupy', 'Dania', 'Dodatki'];
 
+const getLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const Subscription: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString(new Date()));
   const [subPlanner, setSubPlanner] = useState<FullPlannerState>({});
   const [showAddModal, setShowAddModal] = useState<{ category: SubCategory } | null>(null);
   const [modalSearch, setModalSearch] = useState('');
@@ -51,7 +58,7 @@ const Subscription: React.FC = () => {
   const addDishToSubPlan = (dishId: string) => {
     if (!showAddModal) return;
     const { category } = showAddModal;
-    
+
     const dish = MENU_ITEMS.find(i => i.id === dishId);
     if (dish?.isSubDaily) {
       setShowAddModal(null);
@@ -91,7 +98,7 @@ const Subscription: React.FC = () => {
 
   const exportSubDayMenu = () => {
     let text = `MENU ABONAMENTOWE - ${selectedDate}\n\n`;
-    
+
     SUB_CATEGORIES.forEach(cat => {
       const ids = getEffectiveSubPlanIds(selectedDate, cat);
       text += `[${cat.toUpperCase()}]\n`;
@@ -114,8 +121,8 @@ const Subscription: React.FC = () => {
 
   const filteredModalItems = useMemo(() => {
     if (!showAddModal) return [];
-    return MENU_ITEMS.filter(item => 
-      (item.category as string) === showAddModal.category && 
+    return MENU_ITEMS.filter(item =>
+      (item.category as string) === showAddModal.category &&
       item.name.toLowerCase().includes(modalSearch.toLowerCase())
     );
   }, [showAddModal, modalSearch]);
@@ -147,19 +154,18 @@ const Subscription: React.FC = () => {
               <div key={d} className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pb-2">{d}</div>
             ))}
             {daysInMonth.map((day, idx) => {
-              const dateStr = day.toISOString().split('T')[0];
+              const dateStr = getLocalDateString(day);
               const isSelected = selectedDate === dateStr;
               const hasPlan = SUB_CATEGORIES.some(cat => getEffectiveSubPlanIds(dateStr, cat).length > 0);
-              
+
               return (
                 <button
                   key={idx}
                   onClick={() => setSelectedDate(dateStr)}
-                  className={`relative h-12 rounded-xl border flex flex-col items-center justify-center transition-all ${
-                    isSelected 
-                      ? 'bg-[#F28D91] border-[#F28D91] text-white shadow-md z-10' 
-                      : 'bg-white border-gray-100 hover:border-[#F28D91] text-gray-700'
-                  }`}
+                  className={`relative h-12 rounded-xl border flex flex-col items-center justify-center transition-all ${isSelected
+                    ? 'bg-[#F28D91] border-[#F28D91] text-white shadow-md z-10'
+                    : 'bg-white border-gray-100 hover:border-[#F28D91] text-gray-700'
+                    }`}
                 >
                   <span className="text-sm font-bold">{day.getDate()}</span>
                   {hasPlan && (
@@ -179,7 +185,7 @@ const Subscription: React.FC = () => {
               Planowanie menu dla klientów abonamentowych. Niektóre pozycje są stałe i wyświetlają się automatycznie.
             </p>
           </div>
-          <button 
+          <button
             onClick={exportSubDayMenu}
             className="w-full bg-[#4A2C2A] py-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-black transition-all shadow-lg active:scale-95"
           >
@@ -194,8 +200,8 @@ const Subscription: React.FC = () => {
           return (
             <div key={cat} className="bg-white rounded-3xl shadow-sm border border-gray-100 flex flex-col min-h-[350px]">
               <div className="p-4 border-b border-gray-50 bg-pink-50/30 rounded-t-3xl flex justify-between items-center">
-                <h3 className="font-bold text-[#4A2C2A] flex items-center gap-2 uppercase text-xs tracking-wider">
-                  <Ticket size={14} className="text-[#F28D91]" />
+                <h3 className="font-bold text-[#4A2C2A] flex items-center gap-2 uppercase text-lg tracking-wider">
+                  <Ticket size={18} className="text-[#F28D91]" />
                   {cat}
                 </h3>
                 <span className="text-xs font-bold text-gray-400">{dishIds.length}</span>
@@ -220,7 +226,7 @@ const Subscription: React.FC = () => {
                           </div>
                         </div>
                         {!dish.isSubDaily && (
-                          <button 
+                          <button
                             onClick={() => removeDishFromSubPlan(cat, id)}
                             className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0"
                           >
@@ -234,8 +240,8 @@ const Subscription: React.FC = () => {
                     </div>
                   );
                 })}
-                
-                <button 
+
+                <button
                   onClick={() => {
                     setShowAddModal({ category: cat });
                     setModalSearch('');
@@ -263,11 +269,11 @@ const Subscription: React.FC = () => {
                 <X size={24} />
               </button>
             </div>
-            
+
             <div className="p-4 border-b border-gray-100 bg-gray-50">
               <div className="relative">
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input 
+                <input
                   type="text"
                   autoFocus
                   placeholder={`Szukaj w kategorii ${showAddModal.category}...`}
@@ -277,14 +283,14 @@ const Subscription: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="p-4 overflow-y-auto space-y-2">
               {filteredModalItems.length > 0 ? (
                 filteredModalItems.map(dish => {
                   const isAlreadyDaily = dish.isSubDaily;
                   return (
-                    <div 
-                      key={dish.id} 
+                    <div
+                      key={dish.id}
                       onClick={() => !isAlreadyDaily && addDishToSubPlan(dish.id)}
                       className={`p-4 rounded-2xl border flex items-center gap-4 transition-all group ${isAlreadyDaily ? 'bg-gray-50 opacity-60 cursor-not-allowed border-transparent' : 'hover:bg-pink-50 border-transparent hover:border-[#F28D91] cursor-pointer'}`}
                     >

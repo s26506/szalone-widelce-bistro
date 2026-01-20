@@ -6,7 +6,6 @@ import Menu from './components/Menu';
 import Subscription from './components/Subscription';
 import Board from './components/Board';
 import Dishes from './components/Dishes';
-import Footer from './components/Footer';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>(TabType.MENU);
@@ -35,8 +34,6 @@ const App: React.FC = () => {
           {renderContent()}
         </div>
       </main>
-
-      <Footer />
     </div>
   );
 };

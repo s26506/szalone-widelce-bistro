@@ -6,7 +6,7 @@ import { Plus, Edit2, Trash2, Search, Leaf, Zap, Ticket } from 'lucide-react';
 const Dishes: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [dishes, setDishes] = useState<typeof MENU_ITEMS>(MENU_ITEMS);
+  const [dishes, setDishes] = useState<typeof MENU_ITEMS>([]);
   const [editingDishId, setEditingDishId] = useState<string | null>(null);
 
   // Form State
@@ -14,21 +14,30 @@ const Dishes: React.FC = () => {
     name: '',
     category: 'Dania',
     price: '',
-    portion: '',
+    portionQuantity: '',
+    portionUnit: 'g', // Default unit
     isDaily: false,
     isSubDaily: false
   });
 
-  // Load initial data from API
-  React.useEffect(() => {
+  const fetchDishes = () => {
     fetch('/api/menu')
       .then(res => res.json())
-      .then(data => setDishes(data))
+      .then(data => {
+        // Sort alphabetically by name
+        const sorted = data.sort((a: any, b: any) => a.name.localeCompare(b.name, 'pl'));
+        setDishes(sorted);
+      })
       .catch(err => console.error('Failed to load menu:', err));
+  };
+
+  // Load initial data from API
+  React.useEffect(() => {
+    fetchDishes();
   }, []);
 
   const handleSaveDish = async () => {
-    if (!newDish.name || !newDish.price || !newDish.portion) {
+    if (!newDish.name || !newDish.price || !newDish.portionQuantity) {
       alert('Wypełnij wszystkie pola!');
       return;
     }
@@ -36,12 +45,15 @@ const Dishes: React.FC = () => {
     try {
       const url = '/api/menu';
       const method = editingDishId ? 'PUT' : 'POST';
+      // Concatenate quantity and unit (lowercase, no space)
+      const portion = `${newDish.portionQuantity}${newDish.portionUnit.toLowerCase()}`;
+
       const body = {
         ...(editingDishId ? { id: editingDishId } : {}),
         name: newDish.name,
         category: newDish.category,
         price: parseFloat(newDish.price),
-        portion: newDish.portion,
+        portion: portion,
         isDaily: newDish.isDaily,
         isSubDaily: newDish.isSubDaily,
         isVeg: false
@@ -54,11 +66,10 @@ const Dishes: React.FC = () => {
       });
 
       if (response.ok) {
-        alert(editingDishId ? 'Danie zaktualizowane!' : 'Danie dodane pomyślnie!');
         setIsAddModalOpen(false);
         setEditingDishId(null);
-        setNewDish({ name: '', category: 'Dania', price: '', portion: '', isDaily: false, isSubDaily: false });
-        window.location.reload();
+        setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false });
+        fetchDishes(); // Refresh list without reload
       } else {
         alert('Błąd zapisu');
       }
@@ -70,11 +81,18 @@ const Dishes: React.FC = () => {
 
   const handleEdit = (item: any) => {
     setEditingDishId(item.id);
+
+    // Parse portion string (e.g., "400g" -> "400", "g")
+    const match = item.portion.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/);
+    const quantity = match ? match[1] : item.portion;
+    const unit = match ? match[2] : '';
+
     setNewDish({
       name: item.name,
       category: item.category,
       price: item.price.toString(),
-      portion: item.portion,
+      portionQuantity: quantity,
+      portionUnit: unit || 'g',
       isDaily: !!item.isDaily,
       isSubDaily: !!item.isSubDaily
     });
@@ -87,7 +105,7 @@ const Dishes: React.FC = () => {
     try {
       const response = await fetch(`/api/menu?id=${id}`, { method: 'DELETE' });
       if (response.ok) {
-        window.location.reload();
+        fetchDishes();
       } else {
         alert('Nie udało się usunąć dania.');
       }
@@ -151,14 +169,30 @@ const Dishes: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Porcja (ilość + jednostka)</label>
-                <input
-                  type="text"
-                  value={newDish.portion}
-                  onChange={e => setNewDish({ ...newDish, portion: e.target.value })}
-                  className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
-                  placeholder="np. 400g, 2szt, 300ml"
-                />
+                <label className="block text-sm font-bold text-gray-700 mb-1">Porcja</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newDish.portionQuantity}
+                    onChange={e => setNewDish({ ...newDish, portionQuantity: e.target.value })}
+                    className="flex-1 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
+                    placeholder="Ilość (np. 400)"
+                  />
+                  <select
+                    value={newDish.portionUnit}
+                    onChange={e => setNewDish({ ...newDish, portionUnit: e.target.value })}
+                    className="w-24 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
+                  >
+                    {/* Standard units */}
+                    {['g', 'ml', 'szt', 'kg', 'l'].map(u => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                    {/* Fallback for others if editing */}
+                    {!['g', 'ml', 'szt', 'kg', 'l'].includes(newDish.portionUnit) && (
+                      <option value={newDish.portionUnit}>{newDish.portionUnit}</option>
+                    )}
+                  </select>
+                </div>
               </div>
 
               <div className="flex gap-4 pt-2">
@@ -188,7 +222,7 @@ const Dishes: React.FC = () => {
                 onClick={() => {
                   setIsAddModalOpen(false);
                   setEditingDishId(null);
-                  setNewDish({ name: '', category: 'Dania', price: '', portion: '', isDaily: false, isSubDaily: false });
+                  setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false });
                 }}
                 className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
               >
@@ -213,7 +247,7 @@ const Dishes: React.FC = () => {
         <button
           onClick={() => {
             setEditingDishId(null);
-            setNewDish({ name: '', category: 'Dania', price: '', portion: '', isDaily: false, isSubDaily: false });
+            setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false });
             setIsAddModalOpen(true);
           }}
           className="bg-[#C32026] text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-700 transition-all shadow-md active:scale-95"
@@ -288,7 +322,7 @@ const Dishes: React.FC = () => {
                       )}
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-right font-bold text-[#C32026]">{item.price.toFixed(2)} zł</td>
+                  <td className="py-4 px-4 text-right font-bold text-[#C32026] whitespace-nowrap">{item.price.toFixed(2)} zł</td>
                   <td className="py-4 px-4">
                     <div className="flex justify-center gap-2">
                       <button

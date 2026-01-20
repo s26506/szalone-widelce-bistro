@@ -24,9 +24,16 @@ import {
 
 const CATEGORIES: MenuCategory[] = ['Zupy', 'Dodatki', 'Dania', 'Pierogi', 'Sałatki'];
 
+const getLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString(new Date()));
   const isSubscriptionMode = mode === "subscription";
   const [planner, setPlanner] = useState<FullPlannerState>({});
   const [showAddModal, setShowAddModal] = useState<{ category: MenuCategory } | null>(null);
@@ -319,16 +326,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                   </p>
                 </div>
 
-                {/* Stopka z grafiką abonamentową */}
-                <div className="mt-auto w-full flex justify-center pb-8">
-                  <div className="w-[300px] h-[350px] relative opacity-90"> {/* Placeholder size, adjusted to be vertical */}
-                    <img
-                      src={SUBSCRIPTION_FOOTER_SRC}
-                      className="w-full h-full object-contain"
-                      alt="Grafika Abonament"
-                    />
-                  </div>
-                </div>
+                {/* Stopka z grafiką abonamentową (USUNIĘTO) */}
               </div>
             ) : (
               /* --- UKŁAD STANDARDOWY (DAILY MENU) --- */
@@ -497,7 +495,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
               <div key={d} className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pb-2">{d}</div>
             ))}
             {daysInMonth.map((day, idx) => {
-              const dateStr = day.toISOString().split('T')[0];
+              const dateStr = getLocalDateString(day);
               const isSelected = selectedDate === dateStr;
               const hasPlan = displayedCategories.some(cat => getEffectiveDayPlanIds(dateStr, cat).length > 0);
               return (

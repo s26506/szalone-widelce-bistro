@@ -1,7 +1,7 @@
+
 import path from 'path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-
 import fs from 'fs';
 
 export default defineConfig(({ mode }) => {
@@ -23,6 +23,12 @@ export default defineConfig(({ mode }) => {
 
           server.middlewares.use('/api/subscription-planner', (req, res, next) => {
             const plannerPath = path.resolve(__dirname, 'data/subscription_planner.json');
+            handlePlannerRequest(req, res, next, plannerPath);
+          });
+
+          // NEW: Board Planner API Middleware
+          server.middlewares.use('/api/board-planner', (req, res, next) => {
+            const plannerPath = path.resolve(__dirname, 'data/board_planner.json');
             handlePlannerRequest(req, res, next, plannerPath);
           });
 
@@ -52,11 +58,9 @@ export default defineConfig(({ mode }) => {
                   if (fs.existsSync(menuPath)) {
                     items = JSON.parse(fs.readFileSync(menuPath, 'utf8'));
                   }
-                  // Generate ID if missing (simple fallback)
                   if (!newItem.id) {
                     newItem.id = 'manual_' + Date.now();
                   }
-                  // Normalize defaults
                   newItem.isDaily = !!newItem.isDaily;
                   newItem.isSubDaily = !!newItem.isSubDaily;
 
@@ -119,9 +123,7 @@ export default defineConfig(({ mode }) => {
                     const index = items.findIndex(i => i.id === updatedItem.id);
 
                     if (index !== -1) {
-                      // Merge existing with updates
                       items[index] = { ...items[index], ...updatedItem };
-                      // Ensure defaults
                       items[index].isDaily = !!items[index].isDaily;
                       items[index].isSubDaily = !!items[index].isSubDaily;
 
@@ -164,7 +166,6 @@ export default defineConfig(({ mode }) => {
               let body = '';
               req.on('data', chunk => { body += chunk.toString(); });
               req.on('end', () => {
-                // Ensure directory exists
                 const dir = path.dirname(plannerPath);
                 if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 

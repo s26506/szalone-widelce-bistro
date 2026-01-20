@@ -70,6 +70,17 @@ app.post('/api/subscription-planner', (req, res) => {
     res.json({ success: true });
 });
 
+// 2.5 Board Planner API
+const boardPlannerPath = path.join(DATA_DIR, 'board_planner.json');
+app.get('/api/board-planner', (req, res) => {
+    const data = safeReadJSON(boardPlannerPath, {});
+    res.json(data);
+});
+app.post('/api/board-planner', (req, res) => {
+    safeWriteJSON(boardPlannerPath, req.body);
+    res.json({ success: true });
+});
+
 // 3. Menu API
 const menuPath = path.join(DATA_DIR, 'menu.json');
 
