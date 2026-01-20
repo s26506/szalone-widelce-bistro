@@ -1,0 +1,80 @@
+Regulamin i polityka prywatności projektu MIKR.US
+Postanowienia ogólne
+Usługa MIKR.US polega na udostępnianiu użytkownikom serwerów VPS wraz z usługami pobocznymi za opłatą
+Za serwis i usługę odpowiedzialna jest firma "UW-TEAM.org Jakub Mrugalski", NIP: 6821639338, wpisana do Centralnej Ewidencji i informacji o Działalności Gospodarczej (CEIDG).
+Wymagania techniczne niezbędne do korzystania z serwisu mikr.us: użytkownik musi posiadać dostęp do internetu oraz posiadać komputer lub inne urządzenie z przeglądarką internetową z wersją silnika Chromium minimum 135.x. W celu zalogowania się do serwisu niezbędne jest włączenie obsługi ciasteczek w przeglądarce. Korzystanie z usług dostępnych po protokole SSH wymaga posiadania odpowiedniego oprogramowania (np. OpenSSH lub PuTTy).
+Definicje
+Serwer VPS - wirtualna maszyna (lub kontener) z przydzielonymi zasobami, przypisanymi do konkretnego klienta
+Klient - osoba, która wykupiła dostęp do serwera VPS w ramach projektu MIKR.US
+Zasoby - pamięć RAM, SWAP, przepustowość sieci i przestrzeń dyskowa przydzielona klientowi
+Usługodawca - firma "UW-Team.org Jakub Mrugalski"
+Administratorzy - zespół składający się z osób współpracujących przy projekcie MIKR.US i dbających o poprawne funkcjonowanie usługi
+Usługi dodatkowe - zestaw usług niewymienionych w ofercie, do których dostęp może otrzymać Klient. Nie są one integralną częścią oferty.
+Usługi współdzielone - dodatkowe usługi z puli "Usług dodatkowych", które Usługodawca z własnej woli oferuje Klientowi, a które są używane jednocześnie przez innych Klientów i nie posiadają gwarancji zasobów systemowych (RAM, CPU itp.)
+Awaria - nieplanowana przerwa w ciągłości działania usług Usługodawcy
+Przerwa techniczna - zaplanowana i wcześniej ogłoszona przerwa w działaniu usług Usługodawcy
+Interwencja - działanie wykonywane przez Administratora na prośbę Klienta lub z własnej woli w celu zapewnienia ciągłości działania usług Klienta lub Usługodawcy
+Składanie zamówień
+Zamówienia na serwery VPS przyjmowane są jedynie na stronie projektu - https://mikr.us
+Podczas składania zamówienia niezbędne jest podanie prawdziwego imienia, nazwiska oraz adresu e-mail, na którego po zaksięgowaniu wpłaty wysyłane są dane dostępowe do serwera VPS
+Składając zamówienie, użytkownik może posłużyć się kodem zniżkowym w celu obniżenia ceny serwera. Kody takie mogą być ograniczone czasowo jak i ilościowo, a Usługodawca nie odpowiada za posługowanie się wygasłymi kodami zniżkowymi
+Potencjalny klient zobowiązany jest do uiszczenia opłaty za serwer. W tym celu przekierowywany jest do systemu płatności TPAY, gdzie wybiera dogodną dla siebie formę płatności i uiszcza należność za serwer. Kwota należności podana jest na stronie płatności.
+Klient może prosić o wystawienie faktury za zrealizowaną usługę, kontaktując się w tym celu z Usługodawcą mailowo (adres podany na stronie głównej projektu)
+Dostęp do serwera VPS przydzielany jest klientowi na okres jednego roku lub na wielokrotność tego okresu
+Realizacja dostępu do usługi
+Po zaksięgowaniu wpłaty, system wysyła automatyczną wiadomość do klienta z informacjami na temat serwera VPS
+Dostęp do serwera VPS realizowany jest za pomocą protokołu SSH. Klient przyjmuje do wiadomości, że po jego stronie leży obowiązek zaopatrzenia się w niezbędne oprogramowanie, jak i jego konfiguracja celem nawiązania połączenia z serwerem VPS.
+Przydzielony serwer posiada zasoby zdefiniowane w ofercie w momencie składania zamówienia
+Usługodawca zobowiązuje się powiadomić Klienta o planowanych pracach serwisowych z minimum 24-godzinnym wyprzedzeniem. Nie dotyczy to sytuacji, w których z przyczyn niezależnych od Usługodawcy wymagane jest wykonanie natychmiastowej interwencji
+Reklamacje
+Klient może odstąpić od umowy z Usługodawcą w terminie do 14 dni od złożenia zamówienia, jeśli uzna, że dostarczony serwer VPS w jakikolwiek sposób nie pokrywa się z ofertą zasobów prezentowanych na stronie projektu.
+Zgłoszenie odstąpienia od świadczenia usługi może nastąpić przez wysłanie maila na adres pomoc@mikr.us z adresu powiązanego z usługą lub przez otworzenie zgłoszenia w panelu użytkownika
+Usługodawca ma 7 dni roboczych na rozpatrzenie reklamacji
+W przypadku uznania reklamacji, serwer VPS klienta jest usuwany wraz ze wszelkimi znajdującymi się na nim danymi, a pobrana opłata za usługę jest zwracana na konto klienta.
+Jeśli do usługi wystawiono fakturę VAT, wystawiona zostanie także korekta do tej faktury
+Klientowi nie przysługuje prawo do odstąpienia od umowy w okresie trwania abonamentu.
+Czas zwrotu środków w przypadku rezygnacji z usługi wynosi do 5 dni roboczych przy płatności przelewem i do 15 dni roboczych przy płatności kartą płatniczą
+Dozwolony użytek
+Projekt MIKR.US służy do pogłębiania wiedzy klienta z zakresu programowania i administracji systemami Linux. Klient może jednak wykorzystać go także do hostowania własnych usług niewykluczonych przez niniejszy regulamin
+Lista usług zakazanych: serwery gier sieciowych, serwery głosowe (np. TeamSpeak, boty muzyczne Discorda itp), usługi polegające na wydobywaniu lub obrocie kryptowalutami, usługi silnie obciążające zasoby serwera w sposób utrudniający pracę innym użytkownikom (obliczenia rozproszone, przetwarzanie ogromnej ilości danych), wszystkie usługi związane z obsługą lub dostępem do sieci P2P w celu wymiany plików (w tym torrent), wszelkie usługi związane z siecią TOR (exit node, relay itp). Lista ta rozszerzona jest o wszelkie inne działalności zabronione przez prawo Rzeczpospolitej Polskiej.
+Lista czynności zakazanych: skanowanie portów, sprawdzanie zabezpieczeń jakichkolwiek serwerów (w tym innych serwerów VPS oferowanych przez Usługodawcę), hacking, rozsyłanie mailingów, jak i spamu, hostowanie materiałów nielegalnych oraz erotycznych, używanie sieci TOR (w tym bycie exit node, relay node i użytkownikiem), wszelka działalność prowadząca do destabilizacji usług innego podmiotu lub tych należących do Usługodawcy. Lista ta rozszerzona jest także o wszelkie nielegalne działania wymienione w kodeksie karnym Rzeczpospolitej Polskiej.
+Klient może świadczyć usługi (także komercyjne) z wykorzystaniem infrastruktury projektu MIKR.US swoim użytkownikom. Odpowiedzialność za poczynania użytkowników spoczywa jednak na Kliencie.
+Odpowiedzialność Usługodawcy
+Usługodawca umożliwia każdemu podmiotowi zgłaszanie roszczeń do usunięcia treści, które naruszają jego dobre imię, są jego własnością intelektualną lub które są nielegalne w rozumieniu polskich przepisów prawa. Zgłoszenie takie powinno być wysłane na adres dsa@mikr.us i musi zawierać uzasadnienie wraz ze stosownymi dowodami, dlaczego dana treść powinna zostać usunięta z serwerów Usługodawcy. Zgłoszenie musi zawierać jednoznaczny adres URL, którego dotyczy roszczenie oraz musi zawierać imię, nazwisko (lub nazwę firmy) i adres mailowy podmiotu wysyłającego zgłoszenie. Jedynie zgłoszenia dotyczące przestępstw, o których mowa w art. 3-7 dyrektywy 2011/93/UE mogą być zgłaszane anonimowo. Usługodawca bez zbędnej zwłoki powiadomi zgłaszający podmiot o podjętej decyzji, a następnie, jeśli uzna to za konieczne, zablokuje dostęp do wspomnianych materiałów lub zawiesi na rozsądny okres usługę Klienta.
+Usługodawca dokłada wszelkich starań, aby usunąć zaistniałe Awarie i przywrócić funkcjonowanie usług należących do Klienta tak szybko, jak to jest możliwe
+Usługodawca nie odpowiada za szkody wynikłe na skutek działania siły wyższej (w tym powodzie, huragany, pożary, trzęsienia ziemi itp.) oraz na skutek nieuprawnionego działania osób trzecich
+Usługodawca korzysta z usług firm trzecich do świadczenia usług hostingowych (np. Datacenter Hetzner) i nie odpowiada za awarie, interwencje i przerwy techniczne dokonywane przez firmy trzecie z usług których korzysta Usługodawca
+Usługodawca zastrzega sobie prawo do podejmowania interwencji na serwerze klienta w przypadku, gdy serwer ten zagraża bezpieczeństwu infrastruktury Usługodawcy, stabilności działania usług lub gdy istnieje uzasadnione podejrzenie wykorzystywania serwera do celów niezgodnych z polskim prawem. Interwencja taka może zakończyć się wyłączeniem Serwera VPS
+Usługi dodatkowe, do których dostep uzyskuje Klient nie są integralną częścią oferty, a jedynie służą jej wzbogaceniu. Są świadczone nieodpłatnie przez Usługodawcę i mogą zostać zawieszone lub zlikwidowane w dowolnym momencie. Zaprzestanie świadczenia usługi dodatkowej nie jest podstawą do wypowiedzenia umowy przez Klienta. Przykłady usług dodatkowych to współdzielone bazy danych, współdzielony serwer VPN, darmowe dodatkowe usługi hostingowe
+Usługi współdzielone posiadają narzucone limity użytkowania, zdefiniowane w dokumentacji tych usług (na stronie wiki.mikr.us). Przekroczenie tych limitów skutkuje upomnieniem Klienta, a brak zastosowania się do upomnienia w ciągu 7 dni może skutkować zablokowaniem wybranej usługi współdzielonej.
+Usługodawca przerzuca na użytkownika odpowiedzialność za wykonywanie kopii bezpieczeństwa i zapewnienie integralności przetrzymywanych na serwerach Usługodawcy danych
+Usługodawca przetrzymuje kopię zawartości serwera VPS w archiwum przez 14 dni od momentu wygaśnięcia abonamentu użytkownika. Po tym czasie dane są bezpowrotnie usuwane i niemożliwe jest ich odtworzenie.
+Przetwarzanie danych osobowych
+Usługodawca przetwarza dane osobowe klienta celem realizacji usługi polegającej na dostarczeniu dostępu do zamówionego serwera VPS (podstawą prawną przetwarzania jest niezbędność przetwarzania do wykonania umowy (art. 6 ust. 1 lit. b z RODO) oraz w celu ewentualnego ustalenia, dochodzenia lub obrony przed roszczeniami – podstawą prawną przetwarzania jest nasz uzasadniony interes (art. 6 ust. 1 lit. f z RODO)
+Administratorem danych osobowych jest firma "UW-TEAM.org Jakub Mrugalski", posługująca się numerem NIP 6821639338, posiadająca siedzibę w Miłocicach, a reprezentowana przez właściciela, Jakuba Mrugalskiego
+Dane przetwarzane podczas składania zamówienia to: imię, nazwisko, adres mailowy i dane adresowe klienta (przekazywane Usługodawcy przez bank lub pośrednika płatności). Dane te zapisywane są na serwerach firmy Krajowy Integrator Płatności S.A. ul. Św. Marcin 73/6 61-808 Poznań NIP: 7773061579 REGON: 300878437 KRS: 0000412357 (TPAY)
+Usługodawca przetrzymuje na swoich serwerach adres e-mail oraz adres IP klienta, celem umożliwienia mu zalogowania się do panelu sterowania serwerem VPS jak i w celu identyfikacji klienta podczas korespondencji mailowej
+Adres e-mail podany przez klienta może być wykorzystywany do przesyłania mu informacji odnośnie statusu realizacji zamówienia, informacji o rozpoczęciu i zakończeniu obsługi awarii, jak i do świadczenia podstawowej pomocy technicznej.
+Podczas korzystania z usługi, zbierane są dane na temat adresów IP używanych przez klienta. Podyktowane jest to wymogami przepisów Prawa Telekomunikacyjnego (art 182a). Dane te przechowywane są przez wymagany przez prawo czas.
+Okres przetwarzania danych osobowych: dane są przetwarzane przez cały okres trwania abonamentu wykupionego przez klienta, a następnie usuwane po rozwiązaniu umowy z klientem
+Klient ma prawo wglądu w swoje dane, prawo ich modyfikacji, jak i może zażądać ich usunięcia lub ograniczenia przetwarzania. Zaprzestanie przetwarzania danych wiąże się jednak z zaprzestaniem świadczenia usługi, ponieważ niedostępność adresu mailowego uniemożliwi zalogowanie się do niej.
+Jeśli klient uzna, że przetwarzanie dotyczących go danych osobowych narusza przepisy RODO, przysługuje mu prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych, ul. Stawki 2, 00-193 Warszawa
+Polityka prywatności
+Dane osobowe klienta przetwarzane są przez Usługodawcę i pośredników płatności
+Adres e-mail przetrzymywany na serwerach Usługodawcy nie jest udostępniany firmom trzecim
+Strona internetowa z ofertą, jak i panel administracyjny usługi mogą wykorzystywać system ciasteczek (pliki cookie) w celu zapewnienia lepszej obsługi klienta i umożliwić mu zalogowanie się do usługi za pośrednictwem panelu webowego.
+Usługodawca zbiera dane statystyczne na temat klienta za pośrednictwem systemów statystyk (np. Google Analytics) oraz marketingowych (pixele do remarketingu Facebooka i Twittera/X)
+Postanowienia końcowe
+Usługodawca wraz z administratorami dokładają wszelkich starań, aby wszelkie usługi działające w ramach projektu MIKR.US funkcjonowały prawidłowo
+Usługodawca nie gwarantuje żadnego poziomu SLA (Service Level Agreement) świadczenia usługi. Jest to spowodowane charakterem świadczonych usług.
+Klient bierze na siebie pełną odpowiedzialność za dane przechowywane na serwerach Usługodawcy i to na nim leży obowiązek zapewnienia kopii bezpieczeństwa tych danych
+Klient przyjmuje do wiadomości, że jego serwer może zostać zablokowany bez ostrzeżenia w przypadku naruszenia postanowień tego regulaminu lub w przypadku wykrycia łamania przez klienta prawa obowiązującego w Rzeczpospolitej Polskiej.
+Klientowi, który złamał postanowienia regulaminu nie przysługuje rekompensata za niewykorzystany okres abonamentowy
+Klientowi, który wnikliwie czyta postanowienia niniejszego regulaminu przysługuje prawo do jednokrotnego wykorzystania kodu rabatowego RODODSA dającego 10% zniżki na dowolne produkty i usługi (wymienione na stronach mikr.us oraz wiedza.mrugalski.pl) świadczone przez Usługodawcę. Kodu nie można zamienić na ekwiwalent pieniężny ani na dodatkowe dni abonamentu. Kod działa jedynie dla pierwszych stu Klientów, którzy się nim posłużą. Kod można zrealizować jedynie w na poziomie koszyka zakupowego.
+Usługodawca rezerwuje sobie prawo do okresowego testowania zabezpieczeń serwera klienta (w tym haseł dostępowych) w celu wykrycia zbyt słabych zabezpieczeń. Jeśli Usługodawca wykryje nieprawidłowości, zobligowany jest do poinformowania o nich klienta, a w przypadku braku reakcji ze strony klienta, serwer VPS może zostać tymczasowo wyłączony
+Na serwerach Usługodawcy działają zautomatyzowane systemy wykrywania nieprawidłowości na serwerach. Mogą one doprowadzić do tymczasowego wyłączenia serwera VPS klienta w przypadku wykrycia np. podatności w systemie, słabego (bądź pustego) hasła dostępowego do usługi itp.
+Klientowi nie przysługuje rekompensata finansowa za niedostępność usług
+Usługodawca może zmienić zapisy niniejszego regulaminu, powiadamiając o tym wcześniej Klienta. Jeśli klient nie zgadza się z postanowieniami nowego regulaminu, do końca abonamentu obowiązują go postanowienia poprzedniej wersji regulaminu. Przedłużenie ważności usługi oznacza akceptację regulaminu obowiązującego w momencie odnowienia usługi i dalsze świadczenie usługi na rzez Klienta na nowych warunkach.
+Dane kontaktowe
+Preferowaną formą komunikacji z Usługodawcą jest adres mailowy: pomoc@mikr.us
+Kontakt z Inspektorem Ochrony Danych w ramach projektu MIKR.US jest możliwy poprzez adres mailowy: iod@mikr.us.

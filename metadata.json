@@ -1,0 +1,8 @@
+{
+  "name": "Szalone Widelce Bistro",
+  "description": "Elegancka i nowoczesna aplikacja dla restauracji Szalone Widelce Bistro, oferująca menu, plany abonamentowe, aktualności oraz galerię dań.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
