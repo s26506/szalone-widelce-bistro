@@ -200,10 +200,10 @@ const Board: React.FC = () => {
                 if (!item) return null;
                 return (
                   <div key={id} className="border-b border-white py-4 flex flex-col">
-                    <div className="flex justify-between items-baseline mb-2">
-                      <span className="text-4xl font-bold uppercase tracking-wide">{item.name} <span className="text-3xl font-normal normal-case">({item.portion})</span></span>
+                    <div className="flex justify-between items-end mb-2 w-full">
+                      <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case">({item.portion})</span></span>
+                      <span className="text-right text-4xl font-bold whitespace-nowrap">{item.price.toFixed(2)} zł</span>
                     </div>
-                    <div className="text-right text-4xl font-bold">{item.price.toFixed(2)} zł</div>
                   </div>
                 );
               })}
@@ -215,10 +215,10 @@ const Board: React.FC = () => {
                 if (!item) return null;
                 return (
                   <div key={id} className="border-b border-white py-4 flex flex-col">
-                    <div className="flex justify-between items-baseline mb-2">
-                      <span className="text-4xl font-bold uppercase tracking-wide">{item.name} <span className="text-3xl font-normal normal-case">({item.portion})</span></span>
+                    <div className="flex justify-between items-end mb-2 w-full">
+                      <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case">({item.portion})</span></span>
+                      <span className="text-right text-4xl font-bold whitespace-nowrap">{item.price.toFixed(2)} zł</span>
                     </div>
-                    <div className="text-right text-4xl font-bold">{item.price.toFixed(2)} zł</div>
                   </div>
                 );
               })}
@@ -250,9 +250,9 @@ const Board: React.FC = () => {
                   if (!item) return null;
                   return (
                     <div key={id} className="border-b border-white py-4 flex flex-col">
-                      <div className="flex justify-between items-baseline mb-2 flex-wrap">
-                        <span className="text-4xl font-bold uppercase tracking-wide mr-4">{item.name} <span className="text-3xl font-normal normal-case text-white/80">({item.portion})</span></span>
-                        <span className="text-right text-4xl font-bold ml-auto">{item.price.toFixed(2)} zł</span>
+                      <div className="flex justify-between items-end mb-2 w-full">
+                        <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case text-white/80">({item.portion})</span></span>
+                        <span className="text-right text-4xl font-bold whitespace-nowrap ml-auto">{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
@@ -274,9 +274,9 @@ const Board: React.FC = () => {
                   if (!item) return null;
                   return (
                     <div key={id} className="border-b border-white py-4 flex flex-col">
-                      <div className="flex justify-between items-baseline mb-2 flex-wrap">
-                        <span className="text-4xl font-bold uppercase tracking-wide mr-4">{item.name} <span className="text-3xl font-normal normal-case text-white/80">({item.portion})</span></span>
-                        <span className="text-right text-4xl font-bold ml-auto">{item.price.toFixed(2)} zł</span>
+                      <div className="flex justify-between items-end mb-2 w-full">
+                        <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case text-white/80">({item.portion})</span></span>
+                        <span className="text-right text-4xl font-bold whitespace-nowrap ml-auto">{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
