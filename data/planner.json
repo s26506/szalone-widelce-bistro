@@ -1,1 +1,87 @@
-{"2026-01-12":{"Zupy":["imported_257","imported_270","imported_222","manual_271","imported_210","imported_255","manual_273"],"Dodatki":["manual_301","manual_302","manual_304","manual_303","manual_305","manual_306"],"Dania":["manual_277","manual_288","manual_290","imported_36","manual_278","imported_106","manual_294","manual_287","imported_1","imported_63","imported_99","manual_281"],"Pierogi":["manual_307","manual_308","manual_309","manual_310","manual_311","manual_312"],"Sałatki":["manual_296","manual_297","manual_298","manual_299","manual_300"]},"2026-01-13":{"Dania":["imported_4"]},"2026-01-14":{"Zupy":["imported_189","imported_187","imported_188","imported_197","imported_203","imported_200","imported_213"]},"2026-01-30":{"Dania":["imported_4"]},"2026-01-18":{"Zupy":["imported_187"]}}
+{
+  "2026-01-12": {
+    "Zupy": [
+      "imported_257",
+      "imported_270",
+      "imported_222",
+      "manual_271",
+      "imported_210",
+      "imported_255",
+      "manual_273"
+    ],
+    "Dodatki": [
+      "manual_301",
+      "manual_302",
+      "manual_304",
+      "manual_303",
+      "manual_305",
+      "manual_306"
+    ],
+    "Dania": [
+      "manual_277",
+      "manual_288",
+      "manual_290",
+      "imported_36",
+      "manual_278",
+      "imported_106",
+      "manual_294",
+      "manual_287",
+      "imported_1",
+      "imported_63",
+      "imported_99",
+      "manual_281"
+    ],
+    "Pierogi": [
+      "manual_307",
+      "manual_308",
+      "manual_309",
+      "manual_310",
+      "manual_311",
+      "manual_312"
+    ],
+    "Sałatki": [
+      "manual_296",
+      "manual_297",
+      "manual_298",
+      "manual_299",
+      "manual_300"
+    ]
+  },
+  "2026-01-13": {
+    "Dania": [
+      "imported_4"
+    ],
+    "Dodatki": [
+      "manual_306",
+      "manual_303",
+      "manual_304"
+    ]
+  },
+  "2026-01-14": {
+    "Zupy": [
+      "imported_189",
+      "imported_187",
+      "imported_188",
+      "imported_197",
+      "imported_203",
+      "imported_200",
+      "imported_213"
+    ]
+  },
+  "2026-01-30": {
+    "Dania": [
+      "imported_4"
+    ]
+  },
+  "2026-01-18": {
+    "Zupy": [
+      "imported_187"
+    ]
+  },
+  "2026-01-22": {
+    "Zupy": [
+      "imported_187",
+      "imported_187"
+    ]
+  }
+}

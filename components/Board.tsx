@@ -15,10 +15,14 @@ import {
   Zap,
   Loader2,
   UtensilsCrossed,
-  Printer,
   ArrowDownToLine,
-  Copy
+  Copy,
+  Edit2,
+  Ticket,
+  Printer
 } from 'lucide-react';
+import { MenuItem } from '../types';
+import DishFormModal from './DishFormModal';
 
 // Helper for local date string YYYY-MM-DD
 const getLocalDateString = (date: Date) => {
@@ -32,11 +36,19 @@ const Board: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string>(getLocalDateString(new Date()));
   const [planner, setPlanner] = useState<FullPlannerState>({});
+  const [subscriptionPlanner, setSubscriptionPlanner] = useState<FullPlannerState>({});
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Modals & Search
   const [showAddModal, setShowAddModal] = useState<{ category: MenuCategory } | null>(null);
   const [modalSearch, setModalSearch] = useState('');
+  // New state for available dishes (fetched from API)
+  const [availableDishes, setAvailableDishes] = useState<MenuItem[]>([]);
+  // Multiple selection state
+  const [selectedDishIds, setSelectedDishIds] = useState<Set<string>>(new Set());
+  // Dish Editing in Board
+  const [editingDish, setEditingDish] = useState<MenuItem | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Export States
   const [isExportingDania, setIsExportingDania] = useState(false);
@@ -44,8 +56,9 @@ const Board: React.FC = () => {
   const daniaExportRef = useRef<HTMLDivElement>(null);
   const zupyExportRef = useRef<HTMLDivElement>(null);
 
-  // Fetch Data (Board JSON)
+  // Fetch Data (Board JSON) & Menu Items
   React.useEffect(() => {
+    // 1. Fetch Board Plan
     fetch('/api/board-planner')
       .then(res => res.json())
       .then(data => {
@@ -53,7 +66,27 @@ const Board: React.FC = () => {
       })
       .catch(err => console.error('Failed to load board planner', err))
       .finally(() => setIsLoaded(true));
+
+    fetch('/api/subscription-planner')
+      .then(res => res.json())
+      .then(data => {
+        if (data) setSubscriptionPlanner(data);
+      })
+      .catch(err => console.error('Failed to load sub planner', err));
+
+    // 2. Fetch Menu Items using shared logic
+    fetchMenuItems();
   }, []);
+
+  const fetchMenuItems = () => {
+    fetch('/api/menu')
+      .then(res => res.json())
+      .then(data => {
+        // Sort alphabetically
+        setAvailableDishes(data.sort((a: any, b: any) => a.name.localeCompare(b.name, 'pl')));
+      })
+      .catch(err => console.error('Failed to load available dishes', err));
+  };
 
   // Auto-save
   React.useEffect(() => {
@@ -111,22 +144,42 @@ const Board: React.FC = () => {
   };
 
   const getEffectiveDayPlanIds = (date: string, category: MenuCategory) => {
-    const dailyIds = MENU_ITEMS.filter(i => i.isDaily && i.category === category).map(i => i.id);
+    const dailyIds = availableDishes.filter(i => i.isDaily && i.category === category).map(i => i.id);
     const scheduledIds = (planner[date] && planner[date][category]) || [];
     return Array.from(new Set([...dailyIds, ...scheduledIds]));
   };
 
-  const addDishToPlan = (dishId: string) => {
+  const addSelectedDishesToPlan = () => {
     if (!showAddModal) return;
+    const currentDayPlan = (planner[selectedDate] && planner[selectedDate][showAddModal.category]) || [];
+    const newIds = Array.from(selectedDishIds).filter(id => !currentDayPlan.includes(id));
+
+    if (newIds.length === 0) {
+      setShowAddModal(null);
+      return;
+    }
+
     setPlanner(prev => ({
       ...prev,
       [selectedDate]: {
         ...(prev[selectedDate] || {}),
-        [showAddModal.category]: [...(prev[selectedDate]?.[showAddModal.category] || []), dishId]
+        [showAddModal.category]: [...(prev[selectedDate]?.[showAddModal.category] || []), ...newIds]
       }
     }));
     setShowAddModal(null);
     setModalSearch('');
+    setSelectedDishIds(new Set());
+  };
+
+  const toggleDishSelection = (id: string, isDaily: boolean) => {
+    if (isDaily) return;
+    const newSet = new Set(selectedDishIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedDishIds(newSet);
   };
 
   const removeDishFromPlan = (category: string, dishId: string) => {
@@ -166,13 +219,21 @@ const Board: React.FC = () => {
 
   const filteredModalItems = useMemo(() => {
     if (!showAddModal) return [];
-    return MENU_ITEMS.filter(item =>
+    return availableDishes.filter(item =>
       item.category === showAddModal.category &&
       item.name.toLowerCase().includes(modalSearch.toLowerCase())
     );
-  }, [showAddModal, modalSearch]);
+  }, [showAddModal, modalSearch, availableDishes]);
+
+
 
   const allCategories: MenuCategory[] = ['Zupy', 'Dania', 'Dodatki'];
+
+  const isDishInSubscription = (date: string, category: MenuCategory, dishId: string) => {
+    if (!subscriptionPlanner[date]) return false;
+    const subIds = subscriptionPlanner[date][category];
+    return Array.isArray(subIds) && subIds.includes(dishId);
+  };
 
   // --- NEW EXPORT RENDERERS (LANDSCAPE 1920x1080) ---
 
@@ -189,39 +250,52 @@ const Board: React.FC = () => {
         <div ref={daniaExportRef} style={{ width: '1920px', height: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans relative">
           {/* Header */}
           <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-8 uppercase tracking-wider text-white border-b-4 border-white pb-4">
-            DANIA GŁÓWNE
+            DANIA GŁÓWNE:
           </h1>
 
           <div className="flex-grow flex gap-12">
             {/* Col 1 */}
             <div className="w-1/2 flex flex-col gap-0 border-r border-white/20 pr-12">
               {col1.map(id => {
-                const item = MENU_ITEMS.find(i => i.id === id);
+                const item = availableDishes.find(i => i.id === id);
                 if (!item) return null;
+                const isSub = isDishInSubscription(selectedDate, 'Dania', id);
                 return (
                   <div key={id} className="border-b border-white py-4 flex flex-col">
                     <div className="flex justify-between items-end mb-2 w-full">
-                      <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case">({item.portion})</span></span>
-                      <span className="text-right text-4xl font-bold whitespace-nowrap">{item.price.toFixed(2)} zł</span>
+                      <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                        {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                        {item.isVeg && <span className="ml-2 text-3xl font-bold text-green-500">WEGE</span>}
+                      </span>
+                      <span className={`text-right text-4xl font-bold whitespace-nowrap ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
               })}
             </div>
             {/* Col 2 */}
-            <div className="w-1/2 flex flex-col gap-0">
+            <div className="w-1/2 flex flex-col gap-0 relative">
               {col2.map(id => {
-                const item = MENU_ITEMS.find(i => i.id === id);
+                const item = availableDishes.find(i => i.id === id);
                 if (!item) return null;
+                const isSub = isDishInSubscription(selectedDate, 'Dania', id);
                 return (
                   <div key={id} className="border-b border-white py-4 flex flex-col">
                     <div className="flex justify-between items-end mb-2 w-full">
-                      <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case">({item.portion})</span></span>
-                      <span className="text-right text-4xl font-bold whitespace-nowrap">{item.price.toFixed(2)} zł</span>
+                      <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                        {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                        {item.isVeg && <span className="ml-2 text-3xl font-bold text-green-500">WEGE</span>}
+                      </span>
+                      <span className={`text-right text-4xl font-bold whitespace-nowrap ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
               })}
+
+              {/* LEGEND - BOTTOM RIGHT OF RIGHT COLUMN */}
+              <div className="mt-auto pt-8 text-right">
+                <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
+              </div>
             </div>
           </div>
         </div>
@@ -242,17 +316,20 @@ const Board: React.FC = () => {
             {/* ZUPY COLUMN */}
             <div className="w-1/2 flex flex-col h-full">
               <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
-                ZUPY
+                ZUPY:
               </h1>
               <div className="flex flex-col gap-0">
                 {zupyIds.map(id => {
-                  const item = MENU_ITEMS.find(i => i.id === id);
+                  const item = availableDishes.find(i => i.id === id);
                   if (!item) return null;
+                  const isSub = isDishInSubscription(selectedDate, 'Zupy', id);
                   return (
                     <div key={id} className="border-b border-white py-4 flex flex-col">
                       <div className="flex justify-between items-end mb-2 w-full">
-                        <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case text-white/80">({item.portion})</span></span>
-                        <span className="text-right text-4xl font-bold whitespace-nowrap ml-auto">{item.price.toFixed(2)} zł</span>
+                        <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                        </span>
+                        <span className={`text-right text-4xl font-bold whitespace-nowrap ml-auto ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
@@ -266,17 +343,20 @@ const Board: React.FC = () => {
             {/* DODATKI COLUMN */}
             <div className="w-1/2 flex flex-col h-full">
               <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
-                DODATKI
+                DODATKI:
               </h1>
               <div className="flex flex-col gap-0">
                 {dodatkiIds.map(id => {
-                  const item = MENU_ITEMS.find(i => i.id === id);
+                  const item = availableDishes.find(i => i.id === id);
                   if (!item) return null;
+                  const isSub = isDishInSubscription(selectedDate, 'Dodatki', id);
                   return (
                     <div key={id} className="border-b border-white py-4 flex flex-col">
                       <div className="flex justify-between items-end mb-2 w-full">
-                        <span className="text-4xl font-bold uppercase tracking-wide flex-1 mr-4">{item.name} <span className="text-3xl font-normal normal-case text-white/80">({item.portion})</span></span>
-                        <span className="text-right text-4xl font-bold whitespace-nowrap ml-auto">{item.price.toFixed(2)} zł</span>
+                        <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                        </span>
+                        <span className={`text-right text-4xl font-bold whitespace-nowrap ml-auto ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
@@ -284,6 +364,11 @@ const Board: React.FC = () => {
               </div>
             </div>
 
+          </div>
+
+          {/* LEGEND - BOTTOM RIGHT (Absolute within the layout container) */}
+          <div className="absolute bottom-12 right-12">
+            <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
           </div>
         </div>
       </div>
@@ -304,7 +389,7 @@ const Board: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-[#4A2C2A] flex items-center gap-2">
               <CalendarIcon size={20} className="text-[#C32026]" />
-              Kalendarz Tablic Menu
+              Kalendarz Tablic Menu (v2)
             </h2>
             <div className="flex items-center gap-4">
               <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ChevronLeft size={20} /></button>
@@ -388,7 +473,7 @@ const Board: React.FC = () => {
 
               <div className="p-3 flex-grow space-y-2 overflow-y-auto max-h-[500px]">
                 {dishIds.map(id => {
-                  const dish = MENU_ITEMS.find(m => m.id === id);
+                  const dish = availableDishes.find(m => m.id === id);
                   if (!dish) return null;
                   return (
                     <div key={id} className={`group relative p-3 rounded-2xl border transition-all ${dish.isDaily ? 'bg-red-50/50 border-red-100' : 'bg-gray-50 border-gray-100 hover:border-[#C32026]'}`}>
@@ -399,11 +484,20 @@ const Board: React.FC = () => {
                             {dish.name}
                           </div>
                         </div>
-                        {!dish.isDaily && (
-                          <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0">
-                            <Trash2 size={12} />
+                        <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
+                            className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
+                            title="Edytuj w bazie"
+                          >
+                            <Edit2 size={12} />
                           </button>
-                        )}
+                          {!dish.isDaily && (
+                            <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-between text-[10px] text-gray-500 font-medium">
                         <span>{dish.portion}</span>
@@ -425,34 +519,77 @@ const Board: React.FC = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="p-6 bg-[#4A2C2A] text-white flex justify-between items-center">
+            <div className="p-6 bg-[#4A2C2A] text-white flex justify-between items-center flex-shrink-0">
               <div>
                 <h3 className="text-xl font-bold">Wybierz {showAddModal.category}</h3>
-                <p className="text-xs opacity-70">Dodaj do tablicy na {selectedDate}</p>
+                <p className="text-xs opacity-70">Zaznacz dania, które chcesz dodać (lub edytuj bazę).</p>
               </div>
-              <button onClick={() => setShowAddModal(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
+              <button onClick={() => { setShowAddModal(null); setSelectedDishIds(new Set()); }} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
             </div>
-            <div className="p-4 border-b border-gray-100 bg-gray-50">
+            <div className="p-4 border-b border-gray-100 bg-gray-50 flex-shrink-0">
               <div className="relative">
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input type="text" autoFocus placeholder={`Szukaj...`} value={modalSearch} onChange={(e) => setModalSearch(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#C32026] text-sm font-medium transition-all" />
               </div>
             </div>
-            <div className="p-4 overflow-y-auto space-y-2">
-              {filteredModalItems.length > 0 ? filteredModalItems.map(dish => (
-                <div key={dish.id} onClick={() => !dish.isDaily && addDishToPlan(dish.id)} className={`p-4 rounded-2xl border flex items-center gap-4 transition-all group ${dish.isDaily ? 'bg-gray-50 opacity-60 cursor-not-allowed' : 'hover:bg-red-50 border-transparent hover:border-[#C32026] cursor-pointer'}`}
-                >
-                  <div className="flex-grow">
-                    <div className="font-bold text-[#4A2C2A]">{dish.name}</div>
-                    <div className="text-xs text-gray-500">{dish.portion} | {dish.price.toFixed(2)} zł</div>
+            <div className="p-4 overflow-y-auto space-y-2 flex-grow">
+              {filteredModalItems.length > 0 ? filteredModalItems.map(dish => {
+                const isSelected = selectedDishIds.has(dish.id);
+                return (
+                  <div key={dish.id}
+                    className={`p-3 rounded-2xl border flex items-center gap-3 transition-all ${dish.isDaily ? 'bg-gray-50 opacity-60' : isSelected ? 'bg-red-50 border-[#C32026]' : 'border-gray-100 hover:border-gray-300'}`}
+                  >
+                    {!dish.isDaily && (
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleDishSelection(dish.id, dish.isDaily)}
+                        className="w-5 h-5 rounded text-[#C32026] focus:ring-[#C32026] cursor-pointer"
+                      />
+                    )}
+                    {dish.isDaily && <div className="w-5 flex justify-center"><Zap size={16} className="text-gray-400" /></div>}
+
+                    <div className="flex-grow cursor-pointer" onClick={() => toggleDishSelection(dish.id, dish.isDaily)}>
+                      <div className="font-bold text-[#4A2C2A] flex items-center gap-2">
+                        {dish.name}
+                        {dish.isSubDaily && (
+                          <span title="Stałe w Abonamencie" className="flex items-center gap-1 text-[9px] font-bold bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded uppercase border border-pink-200">
+                            <Ticket size={8} className="text-pink-600" /> W Abon.
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-gray-500">{dish.portion} | {dish.price.toFixed(2)} zł</div>
+                    </div>
+
+
                   </div>
-                  {!dish.isDaily && <Plus size={20} className="text-gray-300 group-hover:text-[#C32026]" />}
-                </div>
-              )) : <div className="text-center py-16 text-gray-400 italic">Brak dań w tej kategorii.</div>}
+                )
+              }) : <div className="text-center py-16 text-gray-400 italic">Brak dań w tej kategorii.</div>}
+            </div>
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center flex-shrink-0">
+              <div className="text-xs font-bold text-gray-500">Zaznaczono: {selectedDishIds.size}</div>
+              <button
+                onClick={addSelectedDishesToPlan}
+                disabled={selectedDishIds.size === 0}
+                className="bg-[#C32026] text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              >
+                Dodaj Zaznaczone
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Edit Modal (Board Context) */}
+      <DishFormModal
+        isOpen={isEditModalOpen}
+        onClose={() => { setIsEditModalOpen(false); setEditingDish(null); }}
+        initialData={editingDish}
+        onSave={() => {
+          fetchMenuItems(); // Refresh available items
+          // Ideally we'd also refresh 'planner' state if we wanted live updates, but names are fetched by ID so it works
+        }}
+      />
 
     </div>
   );

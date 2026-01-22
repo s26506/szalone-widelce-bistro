@@ -13,7 +13,7 @@
   },
   {
     "id": "imported_2",
-    "name": "Bigos z młodej kapusty 7,90zl/100g",
+    "name": "Bigos z młodej kapusty",
     "description": "",
     "price": 7.9,
     "portion": "100g",
@@ -25,11 +25,11 @@
   },
   {
     "id": "imported_3",
-    "name": "Bigos z młodej kapusty wege 6,90zl/100g",
+    "name": "Bigos z młodej kapusty wege",
     "description": "",
     "price": 6.9,
     "portion": "100g",
-    "isVeg": true,
+    "isVeg": false,
     "isDaily": false,
     "isSubDaily": false,
     "category": "Dania",
@@ -121,7 +121,7 @@
   },
   {
     "id": "imported_11",
-    "name": "Filet drobiowy po cesarsku 11,90zl/100g",
+    "name": "Filet drobiowy po cesarsku",
     "description": "",
     "price": 11.9,
     "portion": "100g",
@@ -133,7 +133,7 @@
   },
   {
     "id": "imported_12",
-    "name": "Filet drobiowy po toskansku 11,90zl/100g",
+    "name": "Filet drobiowy po toskansku",
     "description": "",
     "price": 11.9,
     "portion": "100g",
@@ -145,7 +145,7 @@
   },
   {
     "id": "imported_13",
-    "name": "Filet drobiowy w kurkach (14,90zł/100g)",
+    "name": "Filet drobiowy w kurkach",
     "description": "",
     "price": 14.9,
     "portion": "100g",
@@ -157,7 +157,7 @@
   },
   {
     "id": "imported_14",
-    "name": "Filet drobiowy w pesto (11,90zł/100g)",
+    "name": "Filet drobiowy w pesto",
     "description": "",
     "price": 11.9,
     "portion": "100g",
@@ -277,7 +277,7 @@
   },
   {
     "id": "imported_24",
-    "name": "Gulasz z udźca indyka 10,90zł/100g",
+    "name": "Gulasz z udźca indyka",
     "description": "",
     "price": 10.9,
     "portion": "100g",
@@ -673,7 +673,7 @@
   },
   {
     "id": "imported_57",
-    "name": "Ogórki małosolne 7,90/100g",
+    "name": "Ogórki małosolne",
     "description": "",
     "price": 7.9,
     "portion": "100g",
@@ -901,7 +901,7 @@
   },
   {
     "id": "imported_76",
-    "name": "Policzki wieprzowe (13,90zł/100g)",
+    "name": "Policzki wieprzowe",
     "description": "",
     "price": 13.9,
     "portion": "100g",
@@ -1117,7 +1117,7 @@
   },
   {
     "id": "imported_94",
-    "name": "Udko z kurczaka bbq 11,90zł/100g",
+    "name": "Udko z kurczaka bbq",
     "description": "",
     "price": 11.9,
     "portion": "100g",
@@ -1153,7 +1153,7 @@
   },
   {
     "id": "imported_97",
-    "name": "Warzywa pod beszamelem 7,90zł/100g",
+    "name": "Warzywa pod beszamelem",
     "description": "",
     "price": 7.9,
     "portion": "100g",
@@ -1225,7 +1225,7 @@
   },
   {
     "id": "imported_103",
-    "name": "Zapiekanka ziemn.z jajkiem 7,90zł/100g",
+    "name": "Zapiekanka ziemn.z jajkiem",
     "description": "",
     "price": 7.9,
     "portion": "100g",
@@ -2549,8 +2549,8 @@
     "description": "",
     "price": 16.9,
     "portion": "1szt",
-    "isVeg": true,
-    "isDaily": false,
+    "isVeg": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Dania",
     "image": ""

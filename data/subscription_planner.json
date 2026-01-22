@@ -1,1 +1,33 @@
-{"2026-01-11":{"Zupy":["imported_187","imported_188","imported_189","imported_190","imported_192"],"Dania":["imported_1","imported_3","imported_4","imported_6"],"Dodatki":["manual_302","manual_303","manual_305","manual_306"]}}
+{
+  "2026-01-11": {
+    "Zupy": [
+      "imported_187",
+      "imported_188",
+      "imported_189",
+      "imported_190",
+      "imported_192"
+    ],
+    "Dania": [
+      "imported_1",
+      "imported_3",
+      "imported_4",
+      "imported_6"
+    ],
+    "Dodatki": [
+      "manual_302",
+      "manual_303",
+      "manual_305",
+      "manual_306"
+    ]
+  },
+  "2026-01-22": {
+    "Dania": [
+      "imported_1"
+    ]
+  },
+  "2026-01-12": {
+    "Dania": [
+      "manual_277"
+    ]
+  }
+}

@@ -15,6 +15,7 @@ const App: React.FC = () => {
       case TabType.MENU:
         return <Menu key="daily" mode="daily" apiEndpoint="/api/planner" />;
       case TabType.ABONAMENT:
+      case TabType.ABONAMENT:
         return <Menu key="subscription" mode="subscription" apiEndpoint="/api/subscription-planner" />;
       case TabType.TABLICA:
         return <Board />;

@@ -1,103 +1,113 @@
-
 import React, { useState } from 'react';
 import { MENU_ITEMS } from '../constants';
-import { Plus, Edit2, Trash2, Search, Leaf, Zap, Ticket } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Leaf, Zap, Ticket, ArrowDownAZ, ArrowUpAZ } from 'lucide-react';
+import DishFormModal from './DishFormModal';
 
 const Dishes: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [dishes, setDishes] = useState<typeof MENU_ITEMS>([]);
-  const [editingDishId, setEditingDishId] = useState<string | null>(null);
+  const [editingDish, setEditingDish] = useState<typeof MENU_ITEMS[0] | null>(null);
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | 'popularity-desc' | 'popularity-asc'>('asc');
 
-  // Form State
-  const [newDish, setNewDish] = useState({
-    name: '',
-    category: 'Dania',
-    price: '',
-    portionQuantity: '',
-    portionUnit: 'g', // Default unit
-    isDaily: false,
-    isSubDaily: false
+  // Stats State
+  const [plannerData, setPlannerData] = useState<any>({});
+  // Default to last 14 days
+  const [startDate, setStartDate] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() - 14);
+    return d.toISOString().split('T')[0];
   });
+  const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
 
   const fetchDishes = () => {
     fetch('/api/menu')
       .then(res => res.json())
       .then(data => {
-        // Sort alphabetically by name
-        const sorted = data.sort((a: any, b: any) => a.name.localeCompare(b.name, 'pl'));
-        setDishes(sorted);
+        // Calculate stats first if needed, but we do it on render or memo
+        // Just set raw data
+        sortAndSetDishes(data, sortOrder);
       })
       .catch(err => console.error('Failed to load menu:', err));
   };
 
-  // Load initial data from API
+  const fetchPlanner = () => {
+    fetch('/api/planner')
+      .then(res => res.json())
+      .then(data => setPlannerData(data))
+      .catch(err => console.error('Failed to load planner data', err));
+  };
+
+  const getUsageCount = (dishId: string) => {
+    let count = 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    Object.keys(plannerData).forEach(dateStr => {
+      const date = new Date(dateStr);
+      if (date >= start && date <= end) {
+        const dayPlan = plannerData[dateStr];
+        Object.values(dayPlan).forEach((dishIds: any) => {
+          if (Array.isArray(dishIds) && dishIds.includes(dishId)) {
+            count++;
+          }
+        });
+      }
+    });
+    return count;
+  };
+
+  const getEffectiveUsageCount = (item: any) => {
+    // Exclude daily items from stats as requested
+    if (item.isDaily) return 0;
+    return getUsageCount(item.id);
+  };
+
+  const sortAndSetDishes = (items: any[], order: string) => {
+    let sorted = [...items];
+    switch (order) {
+      case 'asc':
+        sorted.sort((a, b) => a.name.localeCompare(b.name, 'pl'));
+        break;
+      case 'desc':
+        sorted.sort((a, b) => b.name.localeCompare(a.name, 'pl'));
+        break;
+      case 'popularity-desc':
+        sorted.sort((a, b) => getEffectiveUsageCount(b) - getEffectiveUsageCount(a));
+        break;
+      case 'popularity-asc':
+        sorted.sort((a, b) => getEffectiveUsageCount(a) - getEffectiveUsageCount(b));
+        break;
+    }
+    setDishes(sorted);
+  };
+
+  // Re-sort when dependencies change
   React.useEffect(() => {
+    // We need to pass current dishes state to sort to avoid re-fetching, 
+    // but simplified: just re-sort current 'dishes' if available, otherwise fetch will handle it.
+    if (dishes.length > 0) {
+      sortAndSetDishes(dishes, sortOrder);
+    }
+  }, [sortOrder, plannerData, startDate, endDate]);
+
+  // Initial Load
+  React.useEffect(() => {
+    fetchPlanner();
     fetchDishes();
+    // Use interval to refresh planner data occasionally? No need for now.
   }, []);
 
-  const handleSaveDish = async () => {
-    if (!newDish.name || !newDish.price || !newDish.portionQuantity) {
-      alert('Wypełnij wszystkie pola!');
-      return;
-    }
-
-    try {
-      const url = '/api/menu';
-      const method = editingDishId ? 'PUT' : 'POST';
-      // Concatenate quantity and unit (lowercase, no space)
-      const portion = `${newDish.portionQuantity}${newDish.portionUnit.toLowerCase()}`;
-
-      const body = {
-        ...(editingDishId ? { id: editingDishId } : {}),
-        name: newDish.name,
-        category: newDish.category,
-        price: parseFloat(newDish.price),
-        portion: portion,
-        isDaily: newDish.isDaily,
-        isSubDaily: newDish.isSubDaily,
-        isVeg: false
-      };
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      if (response.ok) {
-        setIsAddModalOpen(false);
-        setEditingDishId(null);
-        setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false });
-        fetchDishes(); // Refresh list without reload
-      } else {
-        alert('Błąd zapisu');
-      }
-    } catch (e) {
-      console.error(e);
-      alert('Błąd połączenia');
-    }
-  };
-
   const handleEdit = (item: any) => {
-    setEditingDishId(item.id);
-
-    // Parse portion string (e.g., "400g" -> "400", "g")
-    const match = item.portion.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/);
-    const quantity = match ? match[1] : item.portion;
-    const unit = match ? match[2] : '';
-
-    setNewDish({
-      name: item.name,
-      category: item.category,
-      price: item.price.toString(),
-      portionQuantity: quantity,
-      portionUnit: unit || 'g',
-      isDaily: !!item.isDaily,
-      isSubDaily: !!item.isSubDaily
-    });
+    setEditingDish(item);
     setIsAddModalOpen(true);
   };
+
+  // Handling click outside could be added here for perfection, 
+  // but for now a simple toggle is enough.
+
+
 
   const handleDelete = async (id: string, name: string) => {
     if (!window.confirm(`Czy na pewno chcesz usunąć danie: ${name}?`)) return;
@@ -123,137 +133,73 @@ const Dishes: React.FC = () => {
   return (
     <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden animate-in fade-in duration-500 relative">
       {/* ADD MODAL */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
-            <h3 className="text-2xl font-bold text-[#4A2C2A] mb-6">
-              {editingDishId ? 'Edytuj Danie' : 'Dodaj Nowe Danie'}
-            </h3>
+      <DishFormModal
+        isOpen={isAddModalOpen}
+        onClose={() => { setIsAddModalOpen(false); setEditingDish(null); }}
+        initialData={editingDish}
+        onSave={fetchDishes}
+      />
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Nazwa Dania</label>
-                <input
-                  type="text"
-                  value={newDish.name}
-                  onChange={e => setNewDish({ ...newDish, name: e.target.value })}
-                  className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
-                  placeholder="np. Kotlet Schabowy"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">Kategoria</label>
-                  <select
-                    value={newDish.category}
-                    onChange={e => setNewDish({ ...newDish, category: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
-                  >
-                    {['Zupy', 'Dania', 'Dodatki', 'Pierogi', 'Sałatki'].map(c => (
-                      <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-1">Cena (zł)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={newDish.price}
-                    onChange={e => setNewDish({ ...newDish, price: e.target.value })}
-                    className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
-                    placeholder="0.00"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Porcja</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newDish.portionQuantity}
-                    onChange={e => setNewDish({ ...newDish, portionQuantity: e.target.value })}
-                    className="flex-1 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
-                    placeholder="Ilość (np. 400)"
-                  />
-                  <select
-                    value={newDish.portionUnit}
-                    onChange={e => setNewDish({ ...newDish, portionUnit: e.target.value })}
-                    className="w-24 p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
-                  >
-                    {/* Standard units */}
-                    {['g', 'ml', 'szt', 'kg', 'l'].map(u => (
-                      <option key={u} value={u}>{u}</option>
-                    ))}
-                    {/* Fallback for others if editing */}
-                    {!['g', 'ml', 'szt', 'kg', 'l'].includes(newDish.portionUnit) && (
-                      <option value={newDish.portionUnit}>{newDish.portionUnit}</option>
-                    )}
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-4 pt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newDish.isDaily}
-                    onChange={e => setNewDish({ ...newDish, isDaily: e.target.checked })}
-                    className="w-5 h-5 rounded text-[#C32026] focus:ring-[#C32026]"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Stałe w Menu</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={newDish.isSubDaily}
-                    onChange={e => setNewDish({ ...newDish, isSubDaily: e.target.checked })}
-                    className="w-5 h-5 rounded text-[#C32026] focus:ring-[#C32026]"
-                  />
-                  <span className="text-sm font-medium text-gray-700">Stałe w Abon.</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="flex gap-3 mt-8">
-              <button
-                onClick={() => {
-                  setIsAddModalOpen(false);
-                  setEditingDishId(null);
-                  setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false });
-                }}
-                className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition-colors"
-              >
-                Anuluj
-              </button>
-              <button
-                onClick={handleSaveDish}
-                className="flex-1 py-3 bg-[#C32026] hover:bg-red-700 text-white font-bold rounded-xl shadow-lg shadow-red-200 transition-all"
-              >
-                {editingDishId ? 'Zaktualizuj' : 'Zapisz'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="p-8 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6 bg-gray-50/50">
-        <div>
+      <div className="p-8 border-b border-gray-100 bg-gray-50/50">
+        <div className="mb-6">
           <h2 className="text-3xl font-bold text-[#4A2C2A]">Baza Wszystkich Dań</h2>
           <p className="text-gray-500">Zarządzaj statusem dań w menu głównym oraz abonamentowym.</p>
         </div>
-        <button
-          onClick={() => {
-            setEditingDishId(null);
-            setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false });
-            setIsAddModalOpen(true);
-          }}
-          className="bg-[#C32026] text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-700 transition-all shadow-md active:scale-95"
-        >
-          <Plus size={20} /> Dodaj Nowe Danie
-        </button>
+
+        <div className="flex flex-col xl:flex-row items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="relative">
+              <button
+                onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
+                className="bg-white text-gray-600 px-4 py-3 rounded-xl font-bold flex items-center gap-2 border border-gray-200 hover:bg-gray-50 transition-all shadow-sm active:scale-95 min-w-[180px] justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  {sortOrder === 'asc' && <><ArrowDownAZ size={20} /> Nazwa A-Z</>}
+                  {sortOrder === 'desc' && <><ArrowUpAZ size={20} /> Nazwa Z-A</>}
+                  {sortOrder === 'popularity-desc' && <><Zap size={20} className="text-yellow-500" /> Najpopularniejsze</>}
+                  {sortOrder === 'popularity-asc' && <><Zap size={20} className="text-gray-400" /> Najrzadsze</>}
+                </span>
+              </button>
+
+              {isSortMenuOpen && (
+                <div className="absolute top-full mt-2 left-0 w-64 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="p-2 space-y-1">
+                    <button onClick={() => { setSortOrder('asc'); setIsSortMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-2 font-medium transition-colors ${sortOrder === 'asc' ? 'bg-red-50 text-[#C32026]' : 'hover:bg-gray-50 text-gray-700'}`}>
+                      <ArrowDownAZ size={18} /> Nazwa A-Z
+                    </button>
+                    <button onClick={() => { setSortOrder('desc'); setIsSortMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-2 font-medium transition-colors ${sortOrder === 'desc' ? 'bg-red-50 text-[#C32026]' : 'hover:bg-gray-50 text-gray-700'}`}>
+                      <ArrowUpAZ size={18} /> Nazwa Z-A
+                    </button>
+                    <button onClick={() => { setSortOrder('popularity-desc'); setIsSortMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-2 font-medium transition-colors ${sortOrder === 'popularity-desc' ? 'bg-red-50 text-[#C32026]' : 'hover:bg-gray-50 text-gray-700'}`}>
+                      <Zap size={18} className="text-yellow-500" /> Najpopularniejsze
+                    </button>
+                    <button onClick={() => { setSortOrder('popularity-asc'); setIsSortMenuOpen(false); }} className={`w-full text-left px-4 py-3 rounded-lg flex items-center gap-2 font-medium transition-colors ${sortOrder === 'popularity-asc' ? 'bg-red-50 text-[#C32026]' : 'hover:bg-gray-50 text-gray-700'}`}>
+                      <Zap size={18} className="text-gray-400" /> Najrzadsze
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-gray-200">
+              <span className="text-xs font-bold text-gray-500 uppercase">Statystyki od:</span>
+              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="text-sm font-bold text-[#4A2C2A] outline-none" />
+              <span className="text-gray-400">-</span>
+              <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="text-sm font-bold text-[#4A2C2A] outline-none" />
+            </div>
+          </div>
+
+          <div className="flex-grow"></div>
+
+          <button
+            onClick={() => {
+              setEditingDish(null);
+              setIsAddModalOpen(true);
+            }}
+            className="bg-[#C32026] text-white px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-red-700 transition-all shadow-md active:scale-95 w-full md:w-auto justify-center"
+          >
+            <Plus size={20} /> Dodaj Nowe Danie
+          </button>
+        </div>
       </div>
 
       <div className="p-8">
@@ -276,6 +222,7 @@ const Dishes: React.FC = () => {
                 <th className="pb-4 px-4">Kategoria</th>
                 <th className="pb-4 px-4">Gramatura</th>
                 <th className="pb-4 px-4 text-center">Stałe Menu</th>
+                <th className="pb-4 px-4 text-center w-32">Wystąpienia<br /><span className="text-[9px] font-normal opacity-70">w wybranym okresie</span></th>
                 <th className="pb-4 px-4 text-center">Stałe Abon.</th>
                 <th className="pb-4 px-4 text-right">Cena</th>
                 <th className="pb-4 px-4 text-center">Akcje</th>
@@ -310,6 +257,14 @@ const Dishes: React.FC = () => {
                         <div className="w-4 h-4 rounded border border-gray-200" />
                       )}
                     </div>
+                  </td>
+                  <td className="py-4 px-4 text-center">
+                    {!item.isDaily && (
+                      <span className={`inline-flex items-center justify-center min-w-[30px] h-8 px-2 rounded-full text-xs font-bold ${getUsageCount(item.id) > 0 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-400'}`}>
+                        {getUsageCount(item.id)}
+                      </span>
+                    )}
+                    {item.isDaily && <span className="text-gray-300 text-xs">-</span>}
                   </td>
                   <td className="py-4 px-4 text-center">
                     <div className="flex justify-center">

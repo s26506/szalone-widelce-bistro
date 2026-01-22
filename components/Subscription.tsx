@@ -12,8 +12,10 @@ import {
   X,
   Search,
   Zap,
-  Ticket
+  Ticket,
+  Edit2
 } from 'lucide-react';
+import DishFormModal from './DishFormModal';
 
 const SUB_CATEGORIES: SubCategory[] = ['Zupy', 'Dania', 'Dodatki'];
 
@@ -30,6 +32,29 @@ const Subscription: React.FC = () => {
   const [subPlanner, setSubPlanner] = useState<FullPlannerState>({});
   const [showAddModal, setShowAddModal] = useState<{ category: SubCategory } | null>(null);
   const [modalSearch, setModalSearch] = useState('');
+
+  // New state for available dishes (fetched from API)
+  const [availableDishes, setAvailableDishes] = useState<MenuItem[]>([]);
+  // Multiple selection state
+  const [selectedDishIds, setSelectedDishIds] = useState<Set<string>>(new Set());
+  // Dish Editing
+  const [editingDish, setEditingDish] = useState<MenuItem | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Fetch Data
+  React.useEffect(() => {
+    fetchMenuItems();
+  }, []);
+
+  const fetchMenuItems = () => {
+    fetch('/api/menu')
+      .then(res => res.json())
+      .then(data => {
+        // Sort alphabetically
+        setAvailableDishes(data.sort((a: any, b: any) => a.name.localeCompare(b.name, 'pl')));
+      })
+      .catch(err => console.error('Failed to load available dishes', err));
+  };
 
   const daysInMonth = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -50,36 +75,43 @@ const Subscription: React.FC = () => {
   };
 
   const getEffectiveSubPlanIds = (date: string, category: SubCategory) => {
-    const subDailyIds = MENU_ITEMS.filter(i => i.isSubDaily && (i.category as string) === category).map(i => i.id);
+    const subDailyIds = availableDishes.filter(i => i.isSubDaily && (i.category as string) === category).map(i => i.id);
     const scheduledIds = (subPlanner[date] && subPlanner[date][category]) || [];
     return Array.from(new Set([...subDailyIds, ...scheduledIds]));
   };
 
-  const addDishToSubPlan = (dishId: string) => {
+  const addSelectedDishesToSubPlan = () => {
     if (!showAddModal) return;
     const { category } = showAddModal;
+    const currentDayPlan = (subPlanner[selectedDate] && subPlanner[selectedDate][category]) || [];
+    const newIds = Array.from(selectedDishIds).filter(id => !currentDayPlan.includes(id));
 
-    const dish = MENU_ITEMS.find(i => i.id === dishId);
-    if (dish?.isSubDaily) {
+    if (newIds.length === 0) {
       setShowAddModal(null);
       return;
     }
 
-    setSubPlanner(prev => {
-      const dayPlan = prev[selectedDate] || {};
-      const catList = dayPlan[category] || [];
-      if (catList.includes(dishId)) return prev;
-
-      return {
-        ...prev,
-        [selectedDate]: {
-          ...dayPlan,
-          [category]: [...catList, dishId]
-        }
-      };
-    });
+    setSubPlanner(prev => ({
+      ...prev,
+      [selectedDate]: {
+        ...(prev[selectedDate] || {}),
+        [category]: [...(prev[selectedDate]?.[category] || []), ...newIds]
+      }
+    }));
     setShowAddModal(null);
     setModalSearch('');
+    setSelectedDishIds(new Set());
+  };
+
+  const toggleDishSelection = (id: string, isSubDaily: boolean) => {
+    if (isSubDaily) return;
+    const newSet = new Set(selectedDishIds);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    setSelectedDishIds(newSet);
   };
 
   const removeDishFromSubPlan = (category: string, dishId: string) => {
@@ -104,7 +136,7 @@ const Subscription: React.FC = () => {
       text += `[${cat.toUpperCase()}]\n`;
       if (ids.length === 0) text += "- Brak pozycji\n";
       ids.forEach(id => {
-        const dish = MENU_ITEMS.find(m => m.id === id);
+        const dish = availableDishes.find(m => m.id === id);
         if (dish) text += `- ${dish.name} ${dish.isVeg ? '(WEGE)' : ''} ${dish.isSubDaily ? '[STAŁE W ABON.]' : ''} | ${dish.portion}\n`;
       });
       text += "\n";
@@ -121,11 +153,11 @@ const Subscription: React.FC = () => {
 
   const filteredModalItems = useMemo(() => {
     if (!showAddModal) return [];
-    return MENU_ITEMS.filter(item =>
+    return availableDishes.filter(item =>
       (item.category as string) === showAddModal.category &&
       item.name.toLowerCase().includes(modalSearch.toLowerCase())
     );
-  }, [showAddModal, modalSearch]);
+  }, [showAddModal, modalSearch, availableDishes]);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -225,14 +257,20 @@ const Subscription: React.FC = () => {
                             {dish.isVeg && <span className="text-[7px] bg-green-100 text-green-700 px-1 rounded uppercase">wege</span>}
                           </div>
                         </div>
-                        {!dish.isSubDaily && (
+                        <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            onClick={() => removeDishFromSubPlan(cat, id)}
-                            className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all opacity-0 group-hover:opacity-100 ml-1 flex-shrink-0"
+                            onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
+                            className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
+                            title="Edytuj w bazie"
                           >
-                            <Trash2 size={12} />
+                            <Edit2 size={12} />
                           </button>
-                        )}
+                          {!dish.isSubDaily && (
+                            <button onClick={() => removeDishFromSubPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <div className="text-[11px] text-gray-500 font-medium">
                         {dish.portion}
@@ -245,6 +283,8 @@ const Subscription: React.FC = () => {
                   onClick={() => {
                     setShowAddModal({ category: cat });
                     setModalSearch('');
+                    // Clean selection
+                    setSelectedDishIds(new Set());
                   }}
                   className="w-full py-4 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-gray-300 hover:border-[#F28D91] hover:text-[#F28D91] transition-all group"
                 >
@@ -265,7 +305,7 @@ const Subscription: React.FC = () => {
                 <h3 className="text-xl font-bold">Abonament: {showAddModal.category}</h3>
                 <p className="text-xs opacity-70">Wybierz dania dla klientów z pakietem</p>
               </div>
-              <button onClick={() => setShowAddModal(null)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+              <button onClick={() => { setShowAddModal(null); setSelectedDishIds(new Set()); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -284,35 +324,44 @@ const Subscription: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-4 overflow-y-auto space-y-2">
+            <div className="p-4 overflow-y-auto space-y-2 flex-grow">
               {filteredModalItems.length > 0 ? (
                 filteredModalItems.map(dish => {
-                  const isAlreadyDaily = dish.isSubDaily;
+                  const isAlreadyDaily = dish.isSubDaily; // "Already Daily" in THIS planner (Subscription)
+                  const isMenuDaily = dish.isDaily; // Constant in the OTHER planner (Menu)
+                  const isSelected = selectedDishIds.has(dish.id);
                   return (
                     <div
                       key={dish.id}
-                      onClick={() => !isAlreadyDaily && addDishToSubPlan(dish.id)}
-                      className={`p-4 rounded-2xl border flex items-center gap-4 transition-all group ${isAlreadyDaily ? 'bg-gray-50 opacity-60 cursor-not-allowed border-transparent' : 'hover:bg-pink-50 border-transparent hover:border-[#F28D91] cursor-pointer'}`}
+                      className={`p-4 rounded-2xl border flex items-center gap-4 transition-all group ${isAlreadyDaily ? 'bg-gray-50 opacity-60 border-transparent' : isSelected ? 'bg-pink-50 border-[#F28D91]' : 'border-gray-100 hover:border-[#F28D91] cursor-pointer'}`}
                     >
-                      <div className="flex-grow">
+                      {!isAlreadyDaily && (
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleDishSelection(dish.id, dish.isSubDaily)}
+                          className="w-5 h-5 rounded text-[#F28D91] focus:ring-[#F28D91] cursor-pointer"
+                        />
+                      )}
+                      {isAlreadyDaily && <div className="w-5 flex justify-center"><Zap size={16} className="text-gray-400" /></div>}
+
+                      <div className="flex-grow cursor-pointer" onClick={() => !isAlreadyDaily && toggleDishSelection(dish.id, dish.isSubDaily)}>
                         <div className="flex items-center gap-2 mb-1">
-                          <div className={`font-bold transition-colors ${isAlreadyDaily ? 'text-gray-400' : 'text-[#4A2C2A] group-hover:text-[#F28D91]'}`}>
+                          <div className={`font-bold transition-colors ${isAlreadyDaily ? 'text-gray-400' : 'text-[#4A2C2A]'}`}>
                             {dish.name}
                           </div>
                           {dish.isVeg && <span className="text-[9px] font-bold bg-green-600 text-white px-1.5 py-0.5 rounded uppercase">wege</span>}
                           {dish.isSubDaily && <span className="text-[9px] font-bold bg-[#F28D91] text-white px-1.5 py-0.5 rounded uppercase">stałe abon.</span>}
+                          {isMenuDaily && (
+                            <span title="Stałe w Menu Głównym" className="flex items-center gap-1 text-[9px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded uppercase border border-orange-200">
+                              <Zap size={8} className="text-orange-600" /> W Menu
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs text-gray-500 font-medium">
                           {dish.portion}
                         </div>
                       </div>
-                      {!isAlreadyDaily ? (
-                        <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center text-gray-300 group-hover:bg-[#F28D91] group-hover:text-white group-hover:border-[#F28D91] transition-all shadow-sm">
-                          <Plus size={20} />
-                        </div>
-                      ) : (
-                        <Zap size={20} className="text-gray-300 mr-2" />
-                      )}
                     </div>
                   );
                 })
@@ -320,9 +369,28 @@ const Subscription: React.FC = () => {
                 <div className="text-center py-16 text-gray-400 italic">Brak dań w tej kategorii.</div>
               )}
             </div>
+            <div className="p-4 border-t border-gray-100 bg-gray-50 flex justify-between items-center flex-shrink-0">
+              <div className="text-xs font-bold text-gray-500">Zaznaczono: {selectedDishIds.size}</div>
+              <button
+                onClick={addSelectedDishesToSubPlan}
+                disabled={selectedDishIds.size === 0}
+                className="bg-[#C32026] text-white px-6 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-md active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              >
+                Dodaj Zaznaczone
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      <DishFormModal
+        isOpen={isEditModalOpen}
+        onClose={() => { setIsEditModalOpen(false); setEditingDish(null); }}
+        initialData={editingDish}
+        onSave={() => {
+          fetchMenuItems();
+        }}
+      />
     </div>
   );
 };
