@@ -111,6 +111,15 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
     const month = currentMonth.getMonth();
     const date = new Date(year, month, 1);
     const days = [];
+
+    // Calculate padding for start of month (Mon=0, Sun=6)
+    const firstDay = date.getDay(); // 0 is Sunday
+    const padding = (firstDay + 6) % 7;
+
+    for (let i = 0; i < padding; i++) {
+      days.push(null);
+    }
+
     while (date.getMonth() === month) {
       days.push(new Date(date));
       date.setDate(date.getDate() + 1);
@@ -645,6 +654,8 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                 <div key={d} className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pb-2">{d}</div>
               ))}
               {daysInMonth.map((day, idx) => {
+                if (!day) return <div key={`empty-${idx}`} className="h-12 border border-transparent" />;
+
                 const dateStr = getLocalDateString(day);
                 const isSelected = selectedDate === dateStr;
                 const hasPlan = displayedCategories.some(cat => getEffectiveDayPlanIds(dateStr, cat).length > 0);
