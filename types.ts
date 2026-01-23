@@ -16,6 +16,8 @@ export interface MenuItem {
   isVeg: boolean;
   isDaily: boolean; // Served every day in general menu
   isSubDaily: boolean; // Served every day in subscription menu
+  dailyOrder?: number;
+  subDailyOrder?: number;
   isPopular?: boolean;
 }
 

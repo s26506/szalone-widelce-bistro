@@ -32,7 +32,7 @@ export const SortableDishRow: React.FC<Props> = ({ id, children }) => {
             <button
                 {...attributes}
                 {...listeners}
-                className="mt-4 p-1 cursor-grab active:cursor-grabbing text-gray-300 hover:text-[#4A2C2A] touch-none transition-colors"
+                className="mt-4 p-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-[#C32026] touch-none transition-colors"
                 title="Przesuń"
             >
                 <GripVertical size={16} />

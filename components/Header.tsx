@@ -22,17 +22,8 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
         <div className="flex flex-col md:flex-row items-center justify-between py-4">
           {/* Admin Logo Section */}
           <div className="flex items-center gap-4 mb-4 md:mb-0">
-            <div className="bg-white p-2 rounded-lg">
-              <div className="text-[#4A2C2A] font-bold flex flex-col items-center leading-none">
-                <span className="text-[10px] italic font-['Playfair_Display'] text-[#C32026]">szalone</span>
-                <div className="flex items-center gap-1">
-                  <span className="text-xl tracking-tighter">WIDELCE</span>
-                  <UtensilsCrossed size={16} className="text-[#C32026]" />
-                </div>
-              </div>
-            </div>
-            <div className="h-8 w-px bg-white/20 hidden md:block" />
-            <div className="hidden md:block">
+            {/* Logo removed as per request */}
+            <div className="block">
               <span className="text-xs uppercase tracking-[0.3em] font-light text-[#F28D91]">Panel Pracownika</span>
             </div>
           </div>
@@ -44,8 +35,8 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
                 key={tab.type}
                 onClick={() => setActiveTab(tab.type)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all text-sm font-semibold uppercase tracking-wider ${activeTab === tab.type
-                    ? 'bg-[#C32026] text-white'
-                    : 'text-white/70 hover:bg-white/10'
+                  ? 'bg-[#C32026] text-white'
+                  : 'text-white/70 hover:bg-white/10'
                   }`}
               >
                 {tab.icon}

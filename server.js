@@ -91,7 +91,7 @@ app.get('/api/menu', (req, res) => {
 
 const capitalizeName = (name) => {
     if (!name) return name;
-    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
 app.post('/api/menu', (req, res) => {
@@ -167,6 +167,37 @@ app.delete('/api/menu', (req, res) => {
         res.json({ success: true });
     } else {
         res.status(404).json({ error: 'Item not found' });
+    }
+});
+
+app.post('/api/menu/reorder', (req, res) => {
+    try {
+        const { mode, orderedIds } = req.body; // mode: 'daily' | 'subDaily'
+        if (!mode || !orderedIds || !Array.isArray(orderedIds)) {
+            return res.status(400).json({ error: 'Invalid input' });
+        }
+
+        let items = safeReadJSON(menuPath, []);
+
+        // Create a map for O(1) lookup
+        const orderMap = new Map(orderedIds.map((id, index) => [id, index]));
+
+        items = items.map(item => {
+            if (orderMap.has(item.id)) {
+                if (mode === 'daily') {
+                    return { ...item, dailyOrder: orderMap.get(item.id) };
+                } else if (mode === 'subDaily') {
+                    return { ...item, subDailyOrder: orderMap.get(item.id) };
+                }
+            }
+            return item;
+        });
+
+        safeWriteJSON(menuPath, items);
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Reorder error:', e);
+        res.status(500).json({ error: 'Failed to reorder' });
     }
 });
 

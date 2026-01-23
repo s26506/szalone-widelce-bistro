@@ -35,6 +35,7 @@ const Subscription: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState<{ category: SubCategory } | null>(null);
   const [modalSearch, setModalSearch] = useState('');
 
+
   // New state for available dishes (fetched from API)
   const [availableDishes, setAvailableDishes] = useState<MenuItem[]>([]);
   // Multiple selection state
@@ -82,7 +83,10 @@ const Subscription: React.FC = () => {
       return subPlanner[date][category];
     }
     // Otherwise return just defaults (Daily items for Subscription)
-    return availableDishes.filter(i => i.isSubDaily && (i.category as string) === category).map(i => i.id);
+    return availableDishes
+      .filter(i => i.isSubDaily && (i.category as string) === category)
+      .sort((a, b) => (a.subDailyOrder ?? 9999) - (b.subDailyOrder ?? 9999))
+      .map(i => i.id);
   };
 
   const addSelectedDishesToSubPlan = () => {
@@ -132,7 +136,7 @@ const Subscription: React.FC = () => {
   };
 
   const toggleDishSelection = (id: string, isSubDaily: boolean) => {
-    if (isSubDaily) return;
+    // Allows manual selection even if subDaily
     const newSet = new Set(selectedDishIds);
     if (newSet.has(id)) {
       newSet.delete(id);
@@ -180,10 +184,11 @@ const Subscription: React.FC = () => {
 
   const filteredModalItems = useMemo(() => {
     if (!showAddModal) return [];
-    return availableDishes.filter(item =>
-      (item.category as string) === showAddModal.category &&
-      item.name.toLowerCase().includes(modalSearch.toLowerCase())
-    );
+    return availableDishes.filter(item => {
+      const matchCat = (item.category as string) === showAddModal.category;
+      const matchSearch = item.name.toLowerCase().includes(modalSearch.toLowerCase());
+      return matchCat && matchSearch;
+    });
   }, [showAddModal, modalSearch, availableDishes]);
 
   return (
@@ -356,7 +361,7 @@ const Subscription: React.FC = () => {
             </div>
 
             <div className="p-4 border-b border-gray-100 bg-gray-50">
-              <div className="relative">
+              <div className="relative mb-2">
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
@@ -367,6 +372,7 @@ const Subscription: React.FC = () => {
                   className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#F28D91] text-sm font-medium transition-all"
                 />
               </div>
+
             </div>
 
             <div className="p-4 overflow-y-auto space-y-2 flex-grow">
@@ -378,16 +384,14 @@ const Subscription: React.FC = () => {
                   return (
                     <div
                       key={dish.id}
-                      className={`p-4 rounded-2xl border flex items-center gap-4 transition-all group ${isAlreadyDaily ? 'bg-gray-50 opacity-60 border-transparent' : isSelected ? 'bg-pink-50 border-[#F28D91]' : 'border-gray-100 hover:border-[#F28D91] cursor-pointer'}`}
+                      className={`p-4 rounded-2xl border flex items-center gap-4 transition-all group ${isAlreadyDaily ? 'bg-pink-50 border-pink-200' : isSelected ? 'bg-pink-50 border-[#F28D91]' : 'border-gray-100 hover:border-[#F28D91] cursor-pointer'}`}
                     >
-                      {!isAlreadyDaily && (
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => toggleDishSelection(dish.id, dish.isSubDaily)}
-                          className="w-5 h-5 rounded text-[#F28D91] focus:ring-[#F28D91] cursor-pointer"
-                        />
-                      )}
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleDishSelection(dish.id, dish.isSubDaily)}
+                        className={`w-5 h-5 rounded cursor-pointer ${isAlreadyDaily ? 'text-pink-500 focus:ring-pink-500' : 'text-[#F28D91] focus:ring-[#F28D91]'}`}
+                      />
                       {isAlreadyDaily && <div className="w-5 flex justify-center"><Zap size={16} className="text-gray-400" /></div>}
 
                       <div className="flex-grow cursor-pointer" onClick={() => !isAlreadyDaily && toggleDishSelection(dish.id, dish.isSubDaily)}>

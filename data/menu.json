@@ -6,10 +6,12 @@
     "price": 7.9,
     "portion": "100g",
     "isVeg": false,
-    "isDaily": false,
-    "isSubDaily": false,
+    "isDaily": true,
+    "isSubDaily": true,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "dailyOrder": 0,
+    "subDailyOrder": 0
   },
   {
     "id": "imported_2",
@@ -18,10 +20,11 @@
     "price": 7.9,
     "portion": "100g",
     "isVeg": false,
-    "isDaily": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "dailyOrder": 1
   },
   {
     "id": "imported_3",
@@ -31,9 +34,10 @@
     "portion": "100g",
     "isVeg": false,
     "isDaily": false,
-    "isSubDaily": false,
+    "isSubDaily": true,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "subDailyOrder": 2
   },
   {
     "id": "imported_4",
@@ -43,9 +47,10 @@
     "portion": "100g",
     "isVeg": false,
     "isDaily": false,
-    "isSubDaily": false,
+    "isSubDaily": true,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "subDailyOrder": 3
   },
   {
     "id": "imported_5",
@@ -54,10 +59,11 @@
     "price": 12.9,
     "portion": "100g",
     "isVeg": false,
-    "isDaily": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "dailyOrder": 2
   },
   {
     "id": "imported_6",
@@ -78,10 +84,11 @@
     "price": 16.9,
     "portion": "100g",
     "isVeg": false,
-    "isDaily": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "dailyOrder": 3
   },
   {
     "id": "imported_8",
@@ -90,10 +97,11 @@
     "price": 7.9,
     "portion": "100g",
     "isVeg": false,
-    "isDaily": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "dailyOrder": 4
   },
   {
     "id": "imported_9",
@@ -103,9 +111,10 @@
     "portion": "100g",
     "isVeg": false,
     "isDaily": false,
-    "isSubDaily": false,
+    "isSubDaily": true,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "subDailyOrder": 1
   },
   {
     "id": "imported_10",
@@ -1302,10 +1311,11 @@
     "price": 12.9,
     "portion": "350ml",
     "isVeg": false,
-    "isDaily": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Zupy",
-    "image": ""
+    "image": "",
+    "dailyOrder": 0
   },
   {
     "id": "imported_188",
@@ -1317,7 +1327,8 @@
     "isDaily": false,
     "isSubDaily": false,
     "category": "Zupy",
-    "image": ""
+    "image": "",
+    "dailyOrder": 1
   },
   {
     "id": "imported_189",
@@ -1326,10 +1337,11 @@
     "price": 14.9,
     "portion": "350ml",
     "isVeg": false,
-    "isDaily": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Zupy",
-    "image": ""
+    "image": "",
+    "dailyOrder": 2
   },
   {
     "id": "imported_190",
@@ -1339,9 +1351,10 @@
     "portion": "350ml",
     "isVeg": false,
     "isDaily": false,
-    "isSubDaily": false,
+    "isSubDaily": true,
     "category": "Zupy",
-    "image": ""
+    "image": "",
+    "dailyOrder": 8
   },
   {
     "id": "imported_191",
@@ -2433,7 +2446,8 @@
     "isDaily": false,
     "isSubDaily": false,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "dailyOrder": 4
   },
   {
     "id": "manual_282",
@@ -2550,10 +2564,11 @@
     "price": 16.9,
     "portion": "1szt",
     "isVeg": false,
-    "isDaily": true,
+    "isDaily": false,
     "isSubDaily": false,
     "category": "Dania",
-    "image": ""
+    "image": "",
+    "dailyOrder": 3
   },
   {
     "id": "manual_292",
@@ -2670,10 +2685,11 @@
     "price": 6.9,
     "portion": "200g",
     "isVeg": false,
-    "isDaily": false,
+    "isDaily": true,
     "isSubDaily": false,
     "category": "Dodatki",
-    "image": ""
+    "image": "",
+    "dailyOrder": 1
   },
   {
     "id": "manual_302",
@@ -2682,10 +2698,12 @@
     "price": 5.5,
     "portion": "150g",
     "isVeg": false,
-    "isDaily": false,
-    "isSubDaily": false,
+    "isDaily": true,
+    "isSubDaily": true,
     "category": "Dodatki",
-    "image": ""
+    "image": "",
+    "subDailyOrder": 0,
+    "dailyOrder": 0
   },
   {
     "id": "manual_303",
@@ -2721,7 +2739,8 @@
     "isDaily": false,
     "isSubDaily": false,
     "category": "Dodatki",
-    "image": ""
+    "image": "",
+    "dailyOrder": 9
   },
   {
     "id": "manual_306",
@@ -2806,5 +2825,26 @@
     "isSubDaily": false,
     "category": "Pierogi",
     "image": ""
+  },
+  {
+    "name": "Dssad xdddd",
+    "category": "Dania",
+    "price": 32,
+    "portion": "123g",
+    "isDaily": false,
+    "isSubDaily": false,
+    "isVeg": false,
+    "id": "manual_1769176872062"
+  },
+  {
+    "name": "Aaaaa",
+    "category": "Dania",
+    "price": 342,
+    "portion": "32g",
+    "isDaily": false,
+    "isSubDaily": false,
+    "isVeg": false,
+    "id": "manual_1769180067310",
+    "dailyOrder": 0
   }
 ]

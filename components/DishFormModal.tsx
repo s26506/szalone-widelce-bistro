@@ -7,7 +7,7 @@ interface DishFormModalProps {
     isOpen: boolean;
     onClose: () => void;
     initialData?: MenuItem | null;
-    onSave: () => void; // Callback to refresh data after save
+    onSave: (savedItem: MenuItem) => void; // Callback to refresh data after save
 }
 
 const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialData, onSave }) => {
@@ -58,7 +58,7 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
 
             const body = {
                 ...(initialData ? { id: initialData.id } : {}),
-                name: newDish.name,
+                name: newDish.name.trim().charAt(0).toUpperCase() + newDish.name.trim().slice(1),
                 category: newDish.category,
                 price: parseFloat(newDish.price),
                 portion: portion,
@@ -74,7 +74,10 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
             });
 
             if (response.ok) {
-                onSave();
+                // Return the actual item from server to ensure we have the ID and latest state
+                const responseData = await response.json();
+                const savedItem = responseData.item || { ...body }; // Fallback if server doesn't return item
+                onSave(savedItem);
                 onClose();
             } else {
                 alert('Błąd zapisu');
@@ -114,7 +117,14 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
                             <label className="block text-sm font-bold text-gray-700 mb-1">Kategoria</label>
                             <select
                                 value={newDish.category}
-                                onChange={e => setNewDish({ ...newDish, category: e.target.value })}
+                                onChange={e => {
+                                    const newCat = e.target.value;
+                                    setNewDish(prev => ({
+                                        ...prev,
+                                        category: newCat,
+                                        isSubDaily: !['Zupy', 'Dania', 'Dodatki'].includes(newCat) ? false : prev.isSubDaily
+                                    }));
+                                }}
                                 className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
                             >
                                 {['Zupy', 'Dania', 'Dodatki', 'Pierogi', 'Sałatki'].map(c => (
@@ -170,11 +180,12 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
                             />
                             <span className="text-sm font-medium text-gray-700">Stałe w Menu</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
+                        <label className={`flex items-center gap-2 ${['Zupy', 'Dania', 'Dodatki'].includes(newDish.category) ? 'cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}>
                             <input
                                 type="checkbox"
                                 checked={newDish.isSubDaily}
                                 onChange={e => setNewDish({ ...newDish, isSubDaily: e.target.checked })}
+                                disabled={!['Zupy', 'Dania', 'Dodatki'].includes(newDish.category)}
                                 className="w-5 h-5 rounded text-[#C32026] focus:ring-[#C32026]"
                             />
                             <span className="text-sm font-medium text-gray-700">Stałe w Abon.</span>

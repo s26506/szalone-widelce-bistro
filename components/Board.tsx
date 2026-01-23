@@ -58,6 +58,7 @@ const Board: React.FC = () => {
   // Modals & Search
   const [showAddModal, setShowAddModal] = useState<{ category: MenuCategory } | null>(null);
   const [modalSearch, setModalSearch] = useState('');
+
   // New state for available dishes (fetched from API)
   const [availableDishes, setAvailableDishes] = useState<MenuItem[]>([]);
   // Multiple selection state
@@ -230,7 +231,7 @@ const Board: React.FC = () => {
   };
 
   const toggleDishSelection = (id: string, isDaily: boolean) => {
-    if (isDaily) return;
+    // Allows manual selection even if daily
     const newSet = new Set(selectedDishIds);
     if (newSet.has(id)) {
       newSet.delete(id);
@@ -280,10 +281,16 @@ const Board: React.FC = () => {
 
   const filteredModalItems = useMemo(() => {
     if (!showAddModal) return [];
-    return availableDishes.filter(item =>
-      item.category === showAddModal.category &&
-      item.name.toLowerCase().includes(modalSearch.toLowerCase())
-    );
+
+    // 1. Filter
+    const filtered = availableDishes.filter(item => {
+      const matchCat = item.category === showAddModal.category;
+      const matchSearch = item.name.toLowerCase().includes(modalSearch.toLowerCase());
+      return matchCat && matchSearch;
+    });
+
+    // 2. Sort
+    return filtered.sort((a, b) => a.name.localeCompare(b.name, 'pl'));
   }, [showAddModal, modalSearch, availableDishes]);
 
 
@@ -460,7 +467,7 @@ const Board: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-[#4A2C2A] flex items-center gap-2">
               <CalendarIcon size={20} className="text-[#C32026]" />
-              Kalendarz Tablic Menu (v2)
+              Kalendarz Menu TV
             </h2>
             <div className="flex items-center gap-4">
               <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ChevronLeft size={20} /></button>
@@ -494,7 +501,7 @@ const Board: React.FC = () => {
         <div className="bg-[#4A2C2A] rounded-3xl p-8 text-white flex flex-col justify-between shadow-xl">
           <div>
             <h3 className="text-sm font-bold uppercase tracking-widest text-[#F28D91] mb-2">
-              Zarządzanie Tablicą
+              Zarządzanie TV
             </h3>
             <div className="text-4xl font-bold mb-4 font-['Playfair_Display']">{selectedDate}</div>
 
@@ -565,7 +572,7 @@ const Board: React.FC = () => {
                       if (!dish) return null;
                       return (
                         <SortableDishRow key={id} id={id}>
-                          <div className={`group relative p-3 rounded-2xl border transition-all ${dish.isDaily ? 'bg-red-50/50 border-red-100' : 'bg-gray-50 border-gray-100 hover:border-[#C32026]'}`}>
+                          <div className={`group relative p-3 rounded-2xl border transition-all ${dish.isDaily ? 'bg-red-50 border-[#C32026] shadow-[0_0_10px_rgba(195,32,38,0.1)]' : 'bg-gray-50 border-gray-100 hover:border-[#C32026]'}`}>
                             <div className="flex justify-between items-start mb-1">
                               <div className="flex-grow min-w-0">
                                 <div className="text-xs font-bold text-[#4A2C2A] leading-tight flex items-center flex-wrap gap-1">
@@ -574,19 +581,19 @@ const Board: React.FC = () => {
                                   {dish.isVeg && <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1 rounded uppercase tracking-wider ml-1">WEGE</span>}
                                 </div>
                               </div>
-                              <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="flex items-center gap-1 flex-shrink-0 opacity-100 transition-opacity">
                                 <button
                                   onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
-                                  className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
+                                  className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
                                   title="Edytuj w bazie"
                                 >
                                   <Edit2 size={12} />
                                 </button>
-                                {!dish.isDaily && (
-                                  <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
-                                    <Trash2 size={12} />
-                                  </button>
-                                )}
+
+                                <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all">
+                                  <Trash2 size={12} />
+                                </button>
+
                               </div>
                             </div>
                             <div className="flex justify-between text-[10px] text-gray-500 font-medium">
@@ -620,27 +627,26 @@ const Board: React.FC = () => {
               <button onClick={() => { setShowAddModal(null); setSelectedDishIds(new Set()); }} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
             </div>
             <div className="p-4 border-b border-gray-100 bg-gray-50 flex-shrink-0">
-              <div className="relative">
+              <div className="relative mb-2">
                 <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input type="text" autoFocus placeholder={`Szukaj...`} value={modalSearch} onChange={(e) => setModalSearch(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#C32026] text-sm font-medium transition-all" />
               </div>
+
             </div>
             <div className="p-4 overflow-y-auto space-y-2 flex-grow">
               {filteredModalItems.length > 0 ? filteredModalItems.map(dish => {
                 const isSelected = selectedDishIds.has(dish.id);
                 return (
                   <div key={dish.id}
-                    className={`p-3 rounded-2xl border flex items-center gap-3 transition-all ${dish.isDaily ? 'bg-gray-50 opacity-60' : isSelected ? 'bg-red-50 border-[#C32026]' : 'border-gray-100 hover:border-gray-300'}`}
+                    className={`p-3 rounded-2xl border flex items-center gap-3 transition-all ${dish.isDaily ? 'bg-amber-50 border-amber-200' : isSelected ? 'bg-red-50 border-[#C32026]' : 'border-gray-100 hover:border-gray-300'}`}
                   >
-                    {!dish.isDaily && (
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleDishSelection(dish.id, dish.isDaily)}
-                        className="w-5 h-5 rounded text-[#C32026] focus:ring-[#C32026] cursor-pointer"
-                      />
-                    )}
-                    {dish.isDaily && <div className="w-5 flex justify-center"><Zap size={16} className="text-gray-400" /></div>}
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleDishSelection(dish.id, dish.isDaily)}
+                      className={`w-5 h-5 rounded cursor-pointer ${dish.isDaily ? 'text-amber-500 focus:ring-amber-500' : 'text-[#C32026] focus:ring-[#C32026]'}`}
+                    />
+                    {dish.isDaily && <div className="w-5 flex justify-center"><Zap size={16} className="text-amber-500" /></div>}
 
                     <div className="flex-grow cursor-pointer" onClick={() => toggleDishSelection(dish.id, dish.isDaily)}>
                       <div className="font-bold text-[#4A2C2A] flex items-center gap-2">
@@ -678,7 +684,7 @@ const Board: React.FC = () => {
         isOpen={isEditModalOpen}
         onClose={() => { setIsEditModalOpen(false); setEditingDish(null); }}
         initialData={editingDish}
-        onSave={() => {
+        onSave={(_) => {
           fetchMenuItems(); // Refresh available items
           // Ideally we'd also refresh 'planner' state if we wanted live updates, but names are fetched by ID so it works
         }}
