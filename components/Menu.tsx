@@ -1,4 +1,4 @@
-
+﻿
 interface MenuProps {
   apiEndpoint: string;
   mode: 'daily' | 'subscription';
@@ -23,6 +23,22 @@ import {
   Edit2
 } from 'lucide-react';
 import DishFormModal from './DishFormModal';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableDishRow } from './SortableDishRow';
 
 const CATEGORIES: MenuCategory[] = ['Zupy', 'Dodatki', 'Dania', 'Pierogi', 'Sałatki'];
 
@@ -108,13 +124,45 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
   };
 
   const getEffectiveDayPlanIds = (date: string, category: MenuCategory) => {
-    // Include automatic items based on mode
-    const dailyIds = !isSubscriptionMode
-      ? availableDishes.filter(i => i.isDaily && i.category === category).map(i => i.id)
-      : availableDishes.filter(i => i.isSubDaily && i.category === category).map(i => i.id);
+    // If planner has saved state, use it as source of truth for order
+    if (planner[date] && planner[date][category]) {
+      return planner[date][category];
+    }
+    return [];
+  };
 
-    const scheduledIds = (planner[date] && planner[date][category]) || [];
-    return Array.from(new Set([...dailyIds, ...scheduledIds]));
+  const fillDailyPlan = () => {
+    if (!confirm('Czy na pewno chcesz uzupełnić stałe pozycje dla tego dnia?')) return;
+
+    // Group automatic items by category
+    const updates: any = { ...planner[selectedDate] } || {};
+
+    // Determine categories based on mode
+    const cats = isSubscriptionMode ? ['Zupy', 'Dania', 'Dodatki'] : CATEGORIES;
+
+    cats.forEach((cat: any) => {
+      const currentIds = updates[cat] || [];
+      const automaticIds = !isSubscriptionMode
+        ? availableDishes.filter(i => i.isDaily && i.category === cat).map(i => i.id)
+        : availableDishes.filter(i => i.isSubDaily && i.category === cat).map(i => i.id);
+
+      // Merge unique
+      const merged = Array.from(new Set([...currentIds, ...automaticIds]));
+      updates[cat] = merged;
+    });
+
+    setPlanner(prev => ({
+      ...prev,
+      [selectedDate]: updates
+    }));
+  };
+
+  const clearDayPlan = () => {
+    if (!confirm(`Czy na pewno wyczyścić cały plan na dzień ${selectedDate}?`)) return;
+    setPlanner(prev => ({
+      ...prev,
+      [selectedDate]: {}
+    }));
   };
 
   const getFontSize = (count: number) => {
@@ -127,8 +175,10 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
   const addSelectedDishesToPlan = () => {
     if (!showAddModal) return;
     const { category } = showAddModal;
-    const currentDayPlan = (planner[selectedDate] && planner[selectedDate][category]) || [];
-    const newIds = Array.from(selectedDishIds).filter(id => !currentDayPlan.includes(id));
+
+    const currentList = getEffectiveDayPlanIds(selectedDate, category);
+
+    const newIds = Array.from(selectedDishIds).filter(id => !currentList.includes(id));
 
     if (newIds.length === 0) {
       setShowAddModal(null);
@@ -139,12 +189,40 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
       ...prev,
       [selectedDate]: {
         ...(prev[selectedDate] || {}),
-        [category]: [...(prev[selectedDate]?.[category] || []), ...newIds]
+        [category]: [...currentList, ...newIds]
       }
     }));
     setShowAddModal(null);
     setModalSearch('');
     setSelectedDishIds(new Set());
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent, category: MenuCategory) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const items = getEffectiveDayPlanIds(selectedDate, category);
+      const oldIndex = items.indexOf(active.id as string);
+      const newIndex = items.indexOf(over.id as string);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        setPlanner(prev => ({
+          ...prev,
+          [selectedDate]: {
+            ...(prev[selectedDate] || {}),
+            [category]: newItems
+          }
+        }));
+      }
+    }
   };
 
   const toggleDishSelection = (id: string, isDaily: boolean) => {
@@ -159,11 +237,14 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
   };
 
   const removeDishFromPlan = (category: string, dishId: string) => {
+    const list = getEffectiveDayPlanIds(selectedDate, category as MenuCategory);
+    const newList = list.filter(id => id !== dishId);
+
     setPlanner(prev => ({
       ...prev,
       [selectedDate]: {
         ...prev[selectedDate],
-        [category]: prev[selectedDate][category].filter(id => id !== dishId)
+        [category]: newList
       }
     }));
   };
@@ -320,8 +401,9 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                         const item = availableDishes.find(i => i.id === id);
                         if (!item) return null;
                         return (
-                          <li key={id} className="text-white/90 text-center py-2 border-b border-white/20 last:border-0 font-bold">
+                          <li key={id} className="text-white/90 text-left py-2 border-b border-white/20 last:border-0 font-bold block">
                             {cleanDishName(item.name)}
+                            {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                           </li>
                         );
                       })}
@@ -336,11 +418,12 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                         const item = availableDishes.find(i => i.id === id);
                         if (!item) return null;
                         return (
-                          <li key={id} className="text-white/90 text-center py-2 border-b border-white/20 last:border-0 font-bold">
+                          <li key={id} className="text-white/90 text-left py-2 border-b border-white/20 last:border-0 font-bold block">
                             {cleanDishName(item.name)}
-                            {item.portion && (item.portion.includes('szt') || item.portion.includes('szt.')) && (
+                            {item.portion && (item.portion.includes('szt') || item.portion.includes('szt.')) && !item.isVeg && (
                               <span className="font-normal opacity-80 text-lg ml-2">({item.portion})</span>
                             )}
+                            {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                           </li>
                         );
                       })}
@@ -355,8 +438,9 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                         const item = availableDishes.find(i => i.id === id);
                         if (!item) return null;
                         return (
-                          <li key={id} className="text-white/90 text-center py-2 border-b border-white/20 last:border-0 font-bold">
+                          <li key={id} className="text-white/90 text-left py-2 border-b border-white/20 last:border-0 font-bold block">
                             {cleanDishName(item.name)}
+                            {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                           </li>
                         );
                       })}
@@ -366,7 +450,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
 
                 <div className="mt-8 text-center pb-4">
                   <p className="text-2xl text-white/90 font-sans tracking-wide mb-4">
-                    oraz dowolna surówka (150g) i kompot wieloowocowy
+                    oraz dowolna surówka (130g) i kompot wieloowocowy
                   </p>
                 </div>
 
@@ -406,10 +490,12 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                               if (!item) return null;
                               return (
                                 <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                  <span className="text-white/90 font-bold">
-                                    {item.name}
-                                    {item.isVeg && <span className="text-[#C32026] text-xs ml-2 font-black">WEGE</span>}
-                                  </span>
+                                  <div className="text-left w-full">
+                                    <span className="text-white/90 font-bold leading-tight decoration-clone">
+                                      {item.name}
+                                      {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
+                                    </span>
+                                  </div>
                                   <span className="text-white/90 ml-4 whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                 </li>
                               );
@@ -432,10 +518,12 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                             if (!item) return null;
                             return (
                               <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                <span className="text-white/90 text-left font-bold">
-                                  {item.name}
-                                  {item.isVeg && <span className="text-[#C32026] text-sm ml-2 font-black">WEGE</span>}
-                                </span>
+                                <div className="text-left w-full">
+                                  <span className="text-white/90 font-bold leading-tight decoration-clone">
+                                    {item.name}
+                                    {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
+                                  </span>
+                                </div>
                                 <span className="text-white/90 ml-4 whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                               </li>
                             );
@@ -453,10 +541,12 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                               if (!item) return null;
                               return (
                                 <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                  <span className="text-white/90 font-bold">
-                                    {item.name}
-                                    {item.isVeg && <span className="text-[#C32026] text-xs ml-2 font-black">WEGE</span>}
-                                  </span>
+                                  <div className="text-left w-full">
+                                    <span className="text-white/90 font-bold leading-tight decoration-clone">
+                                      {item.name}
+                                      {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
+                                    </span>
+                                  </div>
                                   <span className="text-white/90 ml-4 whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                 </li>
                               );
@@ -475,10 +565,12 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                               if (!item) return null;
                               return (
                                 <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                  <span className="text-white/80 font-bold">
-                                    {item.name}
-                                    {item.isVeg && <span className="text-[#C32026] text-xs ml-2 font-black">WEGE</span>}
-                                  </span>
+                                  <div className="text-left w-full">
+                                    <span className="text-white/80 font-bold leading-tight decoration-clone">
+                                      {item.name}
+                                      {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
+                                    </span>
+                                  </div>
                                   <span className="text-white/80 ml-4 whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                 </li>
                               );
@@ -497,9 +589,9 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                               if (!item) return null;
                               return (
                                 <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                  <span className="text-white/80 font-bold">
+                                  <span className="text-white/80 font-bold text-left w-full block">
                                     {item.name}
-                                    {item.isVeg && <span className="text-[#C32026] text-xs ml-2 font-black">WEGE</span>}
+                                    {item.isVeg && <span className="text-[#C32026] text-xs ml-2 font-black align-middle">WEGE</span>}
                                   </span>
                                   <span className="text-white/80 ml-4 whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                 </li>
@@ -564,6 +656,17 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
             <div className="text-4xl font-bold mb-4 font-['Playfair_Display']">{selectedDate}</div>
             <p className="opacity-70 text-sm leading-relaxed mb-6">Pobierz gotową grafikę z tablicą i logo. Idealna na Facebooka.</p>
 
+            <div className="flex gap-2 mb-4">
+              <button onClick={fillDailyPlan} className="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl text-sm font-bold flex flex-col items-center justify-center gap-1 transition-all border border-white/10 group">
+                <Zap size={16} className="text-[#F28D91] group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] opacity-80 group-hover:opacity-100">UZUPEŁNIJ</span>
+              </button>
+              <button onClick={clearDayPlan} className="flex-1 bg-white/10 hover:bg-red-900/50 py-3 rounded-xl text-sm font-bold flex flex-col items-center justify-center gap-1 transition-all border border-white/10 hover:border-red-500/30 group">
+                <Trash2 size={16} className="text-red-400 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] opacity-80 group-hover:opacity-100">WYCZYŚĆ</span>
+              </button>
+            </div>
+
           </div>
           <button
             onClick={exportAsImage}
@@ -591,49 +694,66 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
               </div>
 
               <div className="p-3 flex-grow space-y-2 overflow-y-auto max-h-[500px]">
-                {dishIds.map(id => {
-                  const dish = availableDishes.find(m => m.id === id);
-                  if (!dish) return null;
-                  return (
-                    <div key={id} className={`group relative p-3 rounded-2xl border transition-all ${(dish.isDaily && !isSubscriptionMode) || (dish.isSubDaily && isSubscriptionMode) ? 'bg-red-50/50 border-red-100' : 'bg-gray-50 border-gray-100 hover:border-[#C32026]'}`}>
-                      <div className="flex justify-between items-start mb-1">
-                        <div className="flex-grow min-w-0">
-                          <div className="text-xs font-bold text-[#4A2C2A] leading-tight flex items-center flex-wrap gap-1">
-                            {dish.isDaily && !isSubscriptionMode && <Zap size={10} className="text-[#C32026]" />}
-                            {dish.isSubDaily && isSubscriptionMode && <Zap size={10} className="text-[#F28D91]" />}
-                            {dish.name}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(e, cat)}
+                >
+                  <SortableContext
+                    items={dishIds}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {dishIds.map((id, index) => {
+                      const dish = availableDishes.find(m => m.id === id);
+                      if (!dish) return null;
+                      return (
+                        <SortableDishRow key={id} id={id}>
+                          <div className={`group relative p-3 rounded-2xl border transition-all ${(dish.isDaily && !isSubscriptionMode) || (dish.isSubDaily && isSubscriptionMode) ? 'bg-red-50/50 border-red-100' : 'bg-gray-50 border-gray-100 hover:border-[#C32026]'}`}>
+                            <div className="flex justify-between items-start mb-1">
+                              <div className="flex-grow min-w-0">
+                                <div className="text-xs font-bold text-[#4A2C2A] leading-tight flex items-center flex-wrap gap-1">
+                                  {dish.isDaily && !isSubscriptionMode && <Zap size={10} className="text-[#C32026]" />}
+                                  {dish.isSubDaily && isSubscriptionMode && <Zap size={10} className="text-[#F28D91]" />}
+                                  {dish.name}
+                                  {dish.isVeg && <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1 rounded uppercase tracking-wider ml-1">WEGE</span>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                {/* No Arrows - pure Drag and Drop */}
+                                <button
+                                  onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
+                                  className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
+                                  title="Edytuj w bazie"
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                                {/* Only show delete if NOT an automatic daily dish for current mode */}
+                                {!((dish.isDaily && !isSubscriptionMode) || (dish.isSubDaily && isSubscriptionMode)) && (
+                                  <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
+                                    <Trash2 size={12} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex justify-between text-[10px] text-gray-500 font-medium">
+                              <span>{dish.portion}</span>
+                              <span className="text-[#C32026] font-bold">{dish.price.toFixed(2)} zł</span>
+                            </div>
                           </div>
-                        </div>
-                        {!((dish.isDaily && !isSubscriptionMode) || (dish.isSubDaily && isSubscriptionMode)) && (
-                          <div className="flex gap-1 ml-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
-                              className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
-                              title="Edytuj w bazie"
-                            >
-                              <Edit2 size={12} />
-                            </button>
-                            <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
-                              <Trash2 size={12} />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex justify-between text-[10px] text-gray-500 font-medium">
-                        <span>{dish.portion}</span>
-                        <span className="text-[#C32026] font-bold">{dish.price.toFixed(2)} zł</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                        </SortableDishRow>
+                      );
+                    })}
+                  </SortableContext>
+                </DndContext>
+
                 <button onClick={() => { setShowAddModal({ category: cat }); setModalSearch(''); setSelectedDishIds(new Set()); }} className="w-full py-3 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-gray-400 hover:border-[#C32026] hover:text-[#C32026] transition-all group">
                   <Plus size={18} /> <span className="text-xs font-bold uppercase tracking-wider">Dodaj</span>
                 </button>
               </div>
-            </div>
+            </div >
           );
         })}
-      </div>
+      </div >
 
       {showAddModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
@@ -699,7 +819,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
           fetchMenuItems();
         }}
       />
-    </div>
+    </div >
   );
 };
 

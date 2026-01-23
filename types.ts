@@ -1,7 +1,7 @@
 export enum TabType {
   MENU = 'Planowanie Menu',
   ABONAMENT = 'Abonamenty',
-  TABLICA = 'Tablica Menu',
+  TABLICA = 'Menu TV',
   DANIA = 'Baza Dań'
 }
 

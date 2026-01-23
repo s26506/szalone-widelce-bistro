@@ -18,8 +18,8 @@
       "manual_306"
     ],
     "Dania": [
-      "manual_277",
       "manual_288",
+      "manual_277",
       "manual_290",
       "imported_36",
       "manual_278",
@@ -58,26 +58,20 @@
     ]
   },
   "2026-01-14": {
-    "Zupy": [
-      "imported_189",
-      "imported_187",
-      "imported_188",
-      "imported_197",
-      "imported_203",
-      "imported_200",
-      "imported_213"
-    ]
+    "Zupy": [],
+    "Dodatki": [],
+    "Dania": [
+      "manual_291"
+    ],
+    "Pierogi": [],
+    "Sałatki": []
   },
   "2026-01-30": {
     "Dania": [
       "imported_4"
     ]
   },
-  "2026-01-18": {
-    "Zupy": [
-      "imported_187"
-    ]
-  },
+  "2026-01-18": {},
   "2026-01-22": {
     "Zupy": [
       "imported_187",

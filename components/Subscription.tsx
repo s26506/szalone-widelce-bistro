@@ -13,7 +13,9 @@ import {
   Search,
   Zap,
   Ticket,
-  Edit2
+  Edit2,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 import DishFormModal from './DishFormModal';
 
@@ -75,16 +77,22 @@ const Subscription: React.FC = () => {
   };
 
   const getEffectiveSubPlanIds = (date: string, category: SubCategory) => {
-    const subDailyIds = availableDishes.filter(i => i.isSubDaily && (i.category as string) === category).map(i => i.id);
-    const scheduledIds = (subPlanner[date] && subPlanner[date][category]) || [];
-    return Array.from(new Set([...subDailyIds, ...scheduledIds]));
+    // If we have a specific order/list saved in planner, use it
+    if (subPlanner[date] && subPlanner[date][category] && subPlanner[date][category].length > 0) {
+      return subPlanner[date][category];
+    }
+    // Otherwise return just defaults (Daily items for Subscription)
+    return availableDishes.filter(i => i.isSubDaily && (i.category as string) === category).map(i => i.id);
   };
 
   const addSelectedDishesToSubPlan = () => {
     if (!showAddModal) return;
     const { category } = showAddModal;
-    const currentDayPlan = (subPlanner[selectedDate] && subPlanner[selectedDate][category]) || [];
-    const newIds = Array.from(selectedDishIds).filter(id => !currentDayPlan.includes(id));
+
+    // Get current effective list
+    const currentList = getEffectiveSubPlanIds(selectedDate, category);
+
+    const newIds = Array.from(selectedDishIds).filter(id => !currentList.includes(id));
 
     if (newIds.length === 0) {
       setShowAddModal(null);
@@ -95,12 +103,32 @@ const Subscription: React.FC = () => {
       ...prev,
       [selectedDate]: {
         ...(prev[selectedDate] || {}),
-        [category]: [...(prev[selectedDate]?.[category] || []), ...newIds]
+        [category]: [...currentList, ...newIds]
       }
     }));
     setShowAddModal(null);
     setModalSearch('');
     setSelectedDishIds(new Set());
+  };
+
+  const moveDish = (category: SubCategory, index: number, direction: 'up' | 'down') => {
+    const list = getEffectiveSubPlanIds(selectedDate, category);
+    if (!list || list.length < 2) return;
+
+    const newList = [...list];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (newIndex < 0 || newIndex >= newList.length) return;
+
+    [newList[index], newList[newIndex]] = [newList[newIndex], newList[index]];
+
+    setSubPlanner(prev => ({
+      ...prev,
+      [selectedDate]: {
+        ...(prev[selectedDate] || {}),
+        [category]: newList
+      }
+    }));
   };
 
   const toggleDishSelection = (id: string, isSubDaily: boolean) => {
@@ -115,17 +143,16 @@ const Subscription: React.FC = () => {
   };
 
   const removeDishFromSubPlan = (category: string, dishId: string) => {
-    setSubPlanner(prev => {
-      const dayPlan = prev[selectedDate] || {};
-      const catList = dayPlan[category] || [];
-      return {
-        ...prev,
-        [selectedDate]: {
-          ...dayPlan,
-          [category]: catList.filter(id => id !== dishId)
-        }
-      };
-    });
+    const list = getEffectiveSubPlanIds(selectedDate, category as SubCategory);
+    const newList = list.filter(id => id !== dishId);
+
+    setSubPlanner(prev => ({
+      ...prev,
+      [selectedDate]: {
+        ...(prev[selectedDate] || {}),
+        [category]: newList
+      }
+    }));
   };
 
   const exportSubDayMenu = () => {
@@ -240,7 +267,7 @@ const Subscription: React.FC = () => {
               </div>
 
               <div className="p-4 flex-grow space-y-3 overflow-y-auto max-h-[450px]">
-                {dishIds.map(id => {
+                {dishIds.map((id, index) => {
                   const dish = MENU_ITEMS.find(m => m.id === id);
                   if (!dish) return null;
                   return (
@@ -258,6 +285,24 @@ const Subscription: React.FC = () => {
                           </div>
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {/* Reordering */}
+                          <div className="flex flex-col gap-0.5 mr-1">
+                            <button
+                              onClick={() => moveDish(cat, index, 'up')}
+                              disabled={index === 0}
+                              className="p-0.5 text-gray-300 hover:text-[#F28D91] disabled:opacity-20 disabled:hover:text-gray-300 transition-colors"
+                            >
+                              <ArrowUp size={10} />
+                            </button>
+                            <button
+                              onClick={() => moveDish(cat, index, 'down')}
+                              disabled={index === dishIds.length - 1}
+                              className="p-0.5 text-gray-300 hover:text-[#F28D91] disabled:opacity-20 disabled:hover:text-gray-300 transition-colors"
+                            >
+                              <ArrowDown size={10} />
+                            </button>
+                          </div>
+
                           <button
                             onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
                             className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"

@@ -21,6 +21,22 @@ import {
   Ticket,
   Printer
 } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { SortableDishRow } from './SortableDishRow';
 import { MenuItem } from '../types';
 import DishFormModal from './DishFormModal';
 
@@ -144,15 +160,29 @@ const Board: React.FC = () => {
   };
 
   const getEffectiveDayPlanIds = (date: string, category: MenuCategory) => {
-    const dailyIds = availableDishes.filter(i => i.isDaily && i.category === category).map(i => i.id);
-    const scheduledIds = (planner[date] && planner[date][category]) || [];
-    return Array.from(new Set([...dailyIds, ...scheduledIds]));
+    // If we have a specific order/list saved in planner, use it (it serves as the source of truth for order)
+    if (planner[date] && planner[date][category]) {
+      return planner[date][category];
+    }
+    return [];
+  };
+
+  const clearDayPlan = () => {
+    if (!confirm(`Czy na pewno wyczyścić cały plan na dzień ${selectedDate}?`)) return;
+    setPlanner(prev => ({
+      ...prev,
+      [selectedDate]: {}
+    }));
   };
 
   const addSelectedDishesToPlan = () => {
     if (!showAddModal) return;
-    const currentDayPlan = (planner[selectedDate] && planner[selectedDate][showAddModal.category]) || [];
-    const newIds = Array.from(selectedDishIds).filter(id => !currentDayPlan.includes(id));
+    const { category } = showAddModal;
+
+    // Get current effective list (to preserve existing order and items)
+    const currentList = getEffectiveDayPlanIds(selectedDate, category);
+
+    const newIds = Array.from(selectedDishIds).filter(id => !currentList.includes(id));
 
     if (newIds.length === 0) {
       setShowAddModal(null);
@@ -163,12 +193,40 @@ const Board: React.FC = () => {
       ...prev,
       [selectedDate]: {
         ...(prev[selectedDate] || {}),
-        [showAddModal.category]: [...(prev[selectedDate]?.[showAddModal.category] || []), ...newIds]
+        [category]: [...currentList, ...newIds]
       }
     }));
     setShowAddModal(null);
     setModalSearch('');
     setSelectedDishIds(new Set());
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent, category: MenuCategory) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const items = getEffectiveDayPlanIds(selectedDate, category);
+      const oldIndex = items.indexOf(active.id as string);
+      const newIndex = items.indexOf(over.id as string);
+
+      if (oldIndex !== -1 && newIndex !== -1) {
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        setPlanner(prev => ({
+          ...prev,
+          [selectedDate]: {
+            ...(prev[selectedDate] || {}),
+            [category]: newItems
+          }
+        }));
+      }
+    }
   };
 
   const toggleDishSelection = (id: string, isDaily: boolean) => {
@@ -183,11 +241,14 @@ const Board: React.FC = () => {
   };
 
   const removeDishFromPlan = (category: string, dishId: string) => {
+    const list = getEffectiveDayPlanIds(selectedDate, category as MenuCategory);
+    const newList = list.filter(id => id !== dishId);
+
     setPlanner(prev => ({
       ...prev,
       [selectedDate]: {
-        ...prev[selectedDate],
-        [category]: prev[selectedDate][category].filter(id => id !== dishId)
+        ...(prev[selectedDate] || {}),
+        [category]: newList
       }
     }));
   };
@@ -263,11 +324,13 @@ const Board: React.FC = () => {
                 return (
                   <div key={id} className="border-b border-white py-4 flex flex-col">
                     <div className="flex justify-between items-end mb-2 w-full">
-                      <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                        {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
-                        {item.isVeg && <span className="ml-2 text-3xl font-bold text-green-500">WEGE</span>}
-                      </span>
-                      <span className={`text-right text-4xl font-bold whitespace-nowrap ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <div className="flex flex-col flex-1 mr-4">
+                        <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                        </span>
+                        {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                      </div>
+                      <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
@@ -282,11 +345,13 @@ const Board: React.FC = () => {
                 return (
                   <div key={id} className="border-b border-white py-4 flex flex-col">
                     <div className="flex justify-between items-end mb-2 w-full">
-                      <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                        {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
-                        {item.isVeg && <span className="ml-2 text-3xl font-bold text-green-500">WEGE</span>}
-                      </span>
-                      <span className={`text-right text-4xl font-bold whitespace-nowrap ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <div className="flex flex-col flex-1 mr-4">
+                        <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                        </span>
+                        {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                      </div>
+                      <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
@@ -326,10 +391,13 @@ const Board: React.FC = () => {
                   return (
                     <div key={id} className="border-b border-white py-4 flex flex-col">
                       <div className="flex justify-between items-end mb-2 w-full">
-                        <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
-                        </span>
-                        <span className={`text-right text-4xl font-bold whitespace-nowrap ml-auto ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                        <div className="flex flex-col flex-1 mr-4">
+                          <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                            {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                          </span>
+                          {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                        </div>
+                        <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
@@ -353,10 +421,13 @@ const Board: React.FC = () => {
                   return (
                     <div key={id} className="border-b border-white py-4 flex flex-col">
                       <div className="flex justify-between items-end mb-2 w-full">
-                        <span className={`text-4xl font-bold uppercase tracking-wide flex-1 mr-4 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
-                        </span>
-                        <span className={`text-right text-4xl font-bold whitespace-nowrap ml-auto ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                        <div className="flex flex-col flex-1 mr-4">
+                          <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                            {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                          </span>
+                          {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                        </div>
+                        <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
@@ -427,12 +498,20 @@ const Board: React.FC = () => {
             </h3>
             <div className="text-4xl font-bold mb-4 font-['Playfair_Display']">{selectedDate}</div>
 
-            <button
-              onClick={handleImportFromMenu}
-              className="w-full bg-white/10 hover:bg-white/20 mb-8 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all border border-white/10"
-            >
-              <ArrowDownToLine size={16} /> PRZENIEŚ Z MENU
-            </button>
+            <div className="flex gap-2 mb-8">
+              <button
+                onClick={handleImportFromMenu}
+                className="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl text-[10px] font-bold flex flex-col items-center justify-center gap-1 transition-all border border-white/10 text-center"
+              >
+                <ArrowDownToLine size={16} /> PRZENIEŚ Z MENU
+              </button>
+              <button
+                onClick={clearDayPlan}
+                className="flex-1 bg-white/10 hover:bg-red-900/50 py-3 rounded-xl text-[10px] font-bold flex flex-col items-center justify-center gap-1 transition-all border border-white/10 hover:border-red-500/30 text-center"
+              >
+                <Trash2 size={16} className="text-red-400" /> WYCZYŚĆ DZIEŃ
+              </button>
+            </div>
           </div>
 
           <div className="space-y-4">
@@ -472,40 +551,54 @@ const Board: React.FC = () => {
               </div>
 
               <div className="p-3 flex-grow space-y-2 overflow-y-auto max-h-[500px]">
-                {dishIds.map(id => {
-                  const dish = availableDishes.find(m => m.id === id);
-                  if (!dish) return null;
-                  return (
-                    <div key={id} className={`group relative p-3 rounded-2xl border transition-all ${dish.isDaily ? 'bg-red-50/50 border-red-100' : 'bg-gray-50 border-gray-100 hover:border-[#C32026]'}`}>
-                      <div className="flex justify-between items-start mb-1">
-                        <div className="flex-grow min-w-0">
-                          <div className="text-xs font-bold text-[#4A2C2A] leading-tight flex items-center flex-wrap gap-1">
-                            {dish.isDaily && <Zap size={10} className="text-[#C32026]" />}
-                            {dish.name}
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={(e) => handleDragEnd(e, cat)}
+                >
+                  <SortableContext
+                    items={dishIds}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {dishIds.map((id, index) => {
+                      const dish = availableDishes.find(m => m.id === id);
+                      if (!dish) return null;
+                      return (
+                        <SortableDishRow key={id} id={id}>
+                          <div className={`group relative p-3 rounded-2xl border transition-all ${dish.isDaily ? 'bg-red-50/50 border-red-100' : 'bg-gray-50 border-gray-100 hover:border-[#C32026]'}`}>
+                            <div className="flex justify-between items-start mb-1">
+                              <div className="flex-grow min-w-0">
+                                <div className="text-xs font-bold text-[#4A2C2A] leading-tight flex items-center flex-wrap gap-1">
+                                  {dish.isDaily && <Zap size={10} className="text-[#C32026]" />}
+                                  {dish.name}
+                                  {dish.isVeg && <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1 rounded uppercase tracking-wider ml-1">WEGE</span>}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
+                                  className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
+                                  title="Edytuj w bazie"
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                                {!dish.isDaily && (
+                                  <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
+                                    <Trash2 size={12} />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex justify-between text-[10px] text-gray-500 font-medium">
+                              <span>{dish.portion}</span>
+                              <span className="text-[#C32026] font-bold">{dish.price.toFixed(2)} zł</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => { setEditingDish(dish); setIsEditModalOpen(true); }}
-                            className="p-1 text-gray-300 hover:text-blue-500 hover:bg-blue-50 rounded-md transition-all"
-                            title="Edytuj w bazie"
-                          >
-                            <Edit2 size={12} />
-                          </button>
-                          {!dish.isDaily && (
-                            <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
-                              <Trash2 size={12} />
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex justify-between text-[10px] text-gray-500 font-medium">
-                        <span>{dish.portion}</span>
-                        <span className="text-[#C32026] font-bold">{dish.price.toFixed(2)} zł</span>
-                      </div>
-                    </div>
-                  );
-                })}
+                        </SortableDishRow>
+                      );
+                    })}
+                  </SortableContext>
+                </DndContext>
                 <button onClick={() => { setShowAddModal({ category: cat }); setModalSearch(''); }} className="w-full py-3 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center gap-2 text-gray-400 hover:border-[#C32026] hover:text-[#C32026] transition-all group">
                   <Plus size={18} /> <span className="text-xs font-bold uppercase tracking-wider">Dodaj</span>
                 </button>

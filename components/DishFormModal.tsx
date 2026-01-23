@@ -18,7 +18,8 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
         portionQuantity: '',
         portionUnit: 'g',
         isDaily: false,
-        isSubDaily: false
+        isSubDaily: false,
+        isVeg: false
     });
 
     useEffect(() => {
@@ -35,11 +36,12 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
                 portionQuantity: quantity,
                 portionUnit: unit || 'g',
                 isDaily: !!initialData.isDaily,
-                isSubDaily: !!initialData.isSubDaily
+                isSubDaily: !!initialData.isSubDaily,
+                isVeg: !!initialData.isVeg
             });
         } else {
             // Reset for add mode
-            setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false });
+            setNewDish({ name: '', category: 'Dania', price: '', portionQuantity: '', portionUnit: 'g', isDaily: false, isSubDaily: false, isVeg: false });
         }
     }, [initialData, isOpen]);
 
@@ -62,7 +64,7 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
                 portion: portion,
                 isDaily: newDish.isDaily,
                 isSubDaily: newDish.isSubDaily,
-                isVeg: false
+                isVeg: newDish.isVeg
             };
 
             const response = await fetch(url, {
@@ -176,6 +178,15 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
                                 className="w-5 h-5 rounded text-[#C32026] focus:ring-[#C32026]"
                             />
                             <span className="text-sm font-medium text-gray-700">Stałe w Abon.</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={newDish.isVeg}
+                                onChange={e => setNewDish({ ...newDish, isVeg: e.target.checked })}
+                                className="w-5 h-5 rounded text-green-600 focus:ring-green-600"
+                            />
+                            <span className="text-sm font-bold text-green-700">WEGE</span>
                         </label>
                     </div>
                 </div>

@@ -11,7 +11,9 @@
       "imported_1",
       "imported_3",
       "imported_4",
-      "imported_6"
+      "imported_6",
+      "manual_290",
+      "manual_287"
     ],
     "Dodatki": [
       "manual_302",
@@ -26,8 +28,8 @@
     ]
   },
   "2026-01-12": {
-    "Dania": [
-      "manual_277"
-    ]
+    "Zupy": [],
+    "Dania": [],
+    "Dodatki": []
   }
 }
