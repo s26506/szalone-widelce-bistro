@@ -3,6 +3,7 @@ echo "Backing up data..."
 cp -r data data_backup
 
 echo "Pulling changes..."
+git checkout package-lock.json
 git pull
 
 echo "Restoring data..."
