@@ -443,9 +443,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                           return (
                             <li key={id} className="text-white/90 text-left py-2 border-b border-white/20 last:border-0 font-bold block">
                               {cleanDishName(item.name)}
-                              {item.portion && (item.portion.includes('szt') || item.portion.includes('szt.')) && !item.isVeg && (
-                                <span className="font-normal opacity-80 text-lg ml-2">({item.portion})</span>
-                              )}
+
                               {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                             </li>
                           );

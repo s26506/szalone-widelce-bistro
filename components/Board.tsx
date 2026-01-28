@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { MENU_ITEMS, BANNER_IMAGE_SRC } from '../constants';
 import { MenuCategory, FullPlannerState } from '../types';
-import { toPng } from 'html-to-image';
+import { toPng, toJpeg } from 'html-to-image';
 import {
   Calendar as CalendarIcon,
   Plus,
@@ -147,6 +147,14 @@ const Board: React.FC = () => {
     const month = currentMonth.getMonth();
     const date = new Date(year, month, 1);
     const days = [];
+    // Calculate padding for start of month (Mon=0, Sun=6)
+    const firstDay = date.getDay(); // 0 is Sunday
+    const padding = (firstDay + 6) % 7;
+
+    for (let i = 0; i < padding; i++) {
+      days.push(null);
+    }
+
     while (date.getMonth() === month) {
       days.push(new Date(date));
       date.setDate(date.getDate() + 1);
@@ -266,9 +274,9 @@ const Board: React.FC = () => {
       }));
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const dataUrl = await toPng(ref.current, { cacheBust: true, pixelRatio: 2, width: 1920 });
+      const dataUrl = await toJpeg(ref.current, { cacheBust: true, pixelRatio: 2, width: 1920, backgroundColor: '#000000' });
       const link = document.createElement('a');
-      link.download = `${filename}_${selectedDate}.png`;
+      link.download = `${filename}_${selectedDate}.jpg`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -480,6 +488,7 @@ const Board: React.FC = () => {
               <div key={d} className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest pb-2">{d}</div>
             ))}
             {daysInMonth.map((day, idx) => {
+              if (!day) return <div key={`empty-${idx}`} className="h-12 border border-transparent" />;
               const dateStr = getLocalDateString(day);
               const isSelected = selectedDate === dateStr;
               const hasPlan = allCategories.some(cat => getEffectiveDayPlanIds(dateStr, cat).length > 0);
