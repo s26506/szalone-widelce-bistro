@@ -364,6 +364,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
   // Helper to remove price/weight info from names for Subscription Export
   const cleanDishName = (name: string) => {
     return name
+      .replace(/\s*\(\s*\d+\s*szt\.?\s*\)/gi, '') // Specific remove for (Xszt)
       .replace(/\s*\d+([.,]\d+)?\s*(zł|zl|g|ml|kg|szt\.?)\s*/gi, '') // Remove prices & units
       .replace(/\s*\(\s*\)\s*/g, '') // Remove empty parens
       .replace(/\s+-\s+$/, '') // Remove trailing dash

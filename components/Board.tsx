@@ -323,9 +323,9 @@ const Board: React.FC = () => {
 
     return (
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
-        <div ref={daniaExportRef} style={{ width: '1920px', height: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans relative">
+        <div ref={daniaExportRef} style={{ width: '1920px', minHeight: '1080px' }} className="bg-black text-white p-8 flex flex-col font-sans relative">
           {/* Header */}
-          <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-8 uppercase tracking-wider text-white border-b-4 border-white pb-4">
+          <h1 className="text-7xl font-['Playfair_Display'] font-bold mb-6 uppercase tracking-wider text-white border-b-4 border-white pb-4">
             DANIA GŁÓWNE:
           </h1>
 
@@ -337,15 +337,15 @@ const Board: React.FC = () => {
                 if (!item) return null;
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
                 return (
-                  <div key={id} className="border-b border-white py-4 flex flex-col">
-                    <div className="flex justify-between items-end mb-2 w-full">
+                  <div key={id} className="border-b border-white py-2 flex flex-col">
+                    <div className="flex justify-between items-end mb-1 w-full">
                       <div className="flex flex-col flex-1 mr-4">
-                        <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                        <span className={`text-3xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`text-2xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
                         </span>
-                        {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                        {item.isVeg && <span className="text-2xl font-bold text-green-500 mt-0.5">WEGE</span>}
                       </div>
-                      <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <span className={`text-right text-3xl font-bold whitespace-nowrap mb-0.5 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
@@ -358,15 +358,15 @@ const Board: React.FC = () => {
                 if (!item) return null;
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
                 return (
-                  <div key={id} className="border-b border-white py-4 flex flex-col">
-                    <div className="flex justify-between items-end mb-2 w-full">
+                  <div key={id} className="border-b border-white py-2 flex flex-col">
+                    <div className="flex justify-between items-end mb-1 w-full">
                       <div className="flex flex-col flex-1 mr-4">
-                        <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                        <span className={`text-3xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`text-2xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
                         </span>
-                        {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                        {item.isVeg && <span className="text-2xl font-bold text-green-500 mt-0.5">WEGE</span>}
                       </div>
-                      <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <span className={`text-right text-3xl font-bold whitespace-nowrap mb-0.5 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
@@ -374,7 +374,7 @@ const Board: React.FC = () => {
 
               {/* LEGEND - BOTTOM RIGHT OF RIGHT COLUMN */}
               <div className="mt-auto pt-8 text-right">
-                <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
+                <span className="text-3xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
               </div>
             </div>
           </div>
