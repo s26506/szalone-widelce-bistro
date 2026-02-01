@@ -323,57 +323,99 @@ const Board: React.FC = () => {
 
     return (
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
-        <div ref={daniaExportRef} style={{ width: '1920px', minHeight: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans relative">
+        <div ref={daniaExportRef} style={{ width: '1920px', height: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans relative overflow-hidden">
           {/* Header */}
-          <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-8 uppercase tracking-wider text-white border-b-4 border-white pb-4">
+          <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
             DANIA GŁÓWNE:
           </h1>
 
-          <div className="flex-grow flex gap-12">
+          <div className="flex-grow flex gap-12 h-full">
             {/* Col 1 */}
-            <div className="w-1/2 flex flex-col gap-0 border-r border-white/20 pr-12">
+            <div className="w-1/2 flex flex-col gap-0 border-r border-white/20 pr-12 h-full">
               {col1.map(id => {
                 const item = availableDishes.find(i => i.id === id);
                 if (!item) return null;
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
+
+                // Dynamic font sizing based on count
+                const count = ids.length;
+                let containerClass = "py-4";
+                let nameSize = "text-4xl";
+                let metaSize = "text-3xl";
+                let priceSize = "text-4xl";
+
+                if (count > 20) {
+                  containerClass = "py-2";
+                  nameSize = "text-3xl";
+                  metaSize = "text-2xl";
+                  priceSize = "text-3xl";
+                }
+                if (count > 26) {
+                  containerClass = "py-1";
+                  nameSize = "text-2xl";
+                  metaSize = "text-xl";
+                  priceSize = "text-2xl";
+                }
+
                 return (
-                  <div key={id} className={`border-b border-white flex flex-col justify-center ${ids.length > 20 ? 'py-2' : 'py-4'}`}>
+                  <div key={id} className={`border-b border-white flex flex-col justify-center ${containerClass}`}>
                     <div className="flex justify-between items-end mb-1 w-full">
                       <div className="flex-1 mr-4">
-                        <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
-                          {item.isVeg && <span className="text-3xl font-bold text-green-500 ml-3">WEGE</span>}
+                        <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                          {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
                         </span>
                       </div>
-                      <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <span className={`text-right ${priceSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
               })}
             </div>
             {/* Col 2 */}
-            <div className="w-1/2 flex flex-col gap-0 relative">
+            <div className="w-1/2 flex flex-col gap-0 relative h-full">
               {col2.map(id => {
                 const item = availableDishes.find(i => i.id === id);
                 if (!item) return null;
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
+
+                // Dynamic font sizing based on count (Same as Col 1)
+                const count = ids.length;
+                let containerClass = "py-4";
+                let nameSize = "text-4xl";
+                let metaSize = "text-3xl";
+                let priceSize = "text-4xl";
+
+                if (count > 20) {
+                  containerClass = "py-2";
+                  nameSize = "text-3xl";
+                  metaSize = "text-2xl";
+                  priceSize = "text-3xl";
+                }
+                if (count > 26) {
+                  containerClass = "py-1";
+                  nameSize = "text-2xl";
+                  metaSize = "text-xl";
+                  priceSize = "text-2xl";
+                }
+
                 return (
-                  <div key={id} className={`border-b border-white flex flex-col justify-center ${ids.length > 20 ? 'py-2' : 'py-4'}`}>
+                  <div key={id} className={`border-b border-white flex flex-col justify-center ${containerClass}`}>
                     <div className="flex justify-between items-end mb-1 w-full">
                       <div className="flex-1 mr-4">
-                        <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
-                          {item.isVeg && <span className="text-3xl font-bold text-green-500 ml-3">WEGE</span>}
+                        <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                          {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
                         </span>
                       </div>
-                      <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <span className={`text-right ${priceSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                     </div>
                   </div>
                 );
               })}
 
               {/* LEGEND - BOTTOM RIGHT OF RIGHT COLUMN */}
-              <div className="mt-auto pt-8 text-right">
+              <div className="absolute bottom-4 right-0 text-right">
                 <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
               </div>
             </div>
@@ -390,7 +432,7 @@ const Board: React.FC = () => {
 
     return (
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
-        <div ref={zupyExportRef} style={{ width: '1920px', height: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans">
+        <div ref={zupyExportRef} style={{ width: '1920px', height: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans overflow-hidden">
           <div className="flex-grow flex gap-16 h-full">
 
             {/* ZUPY COLUMN */}
@@ -403,16 +445,26 @@ const Board: React.FC = () => {
                   const item = availableDishes.find(i => i.id === id);
                   if (!item) return null;
                   const isSub = isDishInSubscription(selectedDate, 'Zupy', id);
+                  // Font scaling for Zupy
+                  const count = zupyIds.length;
+                  let containerClass = "py-4";
+                  let nameSize = "text-4xl";
+                  let metaSize = "text-3xl";
+
+                  if (count > 8) { containerClass = "py-2"; }
+                  if (count > 12) { containerClass = "py-1"; nameSize = "text-3xl"; metaSize = "text-2xl"; }
+
+
                   return (
-                    <div key={id} className="border-b border-white py-4 flex flex-col">
-                      <div className="flex justify-between items-end mb-2 w-full">
+                    <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
+                      <div className="flex justify-between items-end mb-1 w-full">
                         <div className="flex flex-col flex-1 mr-4">
-                          <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                            {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                          <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                            {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
                           </span>
-                          {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                          {item.isVeg && <span className={`${metaSize} font-bold text-green-500 mt-1`}>WEGE</span>}
                         </div>
-                        <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                        <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
@@ -433,16 +485,26 @@ const Board: React.FC = () => {
                   const item = availableDishes.find(i => i.id === id);
                   if (!item) return null;
                   const isSub = isDishInSubscription(selectedDate, 'Dodatki', id);
+                  // Font scaling for Dodatki matches Zupy logic roughly or independent
+                  const count = dodatkiIds.length;
+                  let containerClass = "py-4";
+                  let nameSize = "text-4xl";
+                  let metaSize = "text-3xl";
+
+                  if (count > 8) { containerClass = "py-2"; }
+                  if (count > 12) { containerClass = "py-1"; nameSize = "text-3xl"; metaSize = "text-2xl"; }
+
+
                   return (
-                    <div key={id} className="border-b border-white py-4 flex flex-col">
-                      <div className="flex justify-between items-end mb-2 w-full">
+                    <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
+                      <div className="flex justify-between items-end mb-1 w-full">
                         <div className="flex flex-col flex-1 mr-4">
-                          <span className={`text-4xl font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                            {item.name} <span className={`text-3xl font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                          <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                            {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
                           </span>
-                          {item.isVeg && <span className="text-3xl font-bold text-green-500 mt-1">WEGE</span>}
+                          {item.isVeg && <span className={`${metaSize} font-bold text-green-500 mt-1`}>WEGE</span>}
                         </div>
-                        <span className={`text-right text-4xl font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                        <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                       </div>
                     </div>
                   );
