@@ -344,13 +344,13 @@ const Board: React.FC = () => {
                 let metaSize = "text-3xl";
                 let priceSize = "text-4xl";
 
-                if (count > 20) {
+                if (count > 14) {
                   containerClass = "py-2";
                   nameSize = "text-3xl";
                   metaSize = "text-2xl";
                   priceSize = "text-3xl";
                 }
-                if (count > 26) {
+                if (count > 22) {
                   containerClass = "py-1";
                   nameSize = "text-2xl";
                   metaSize = "text-xl";
@@ -386,13 +386,13 @@ const Board: React.FC = () => {
                 let metaSize = "text-3xl";
                 let priceSize = "text-4xl";
 
-                if (count > 20) {
+                if (count > 14) {
                   containerClass = "py-2";
                   nameSize = "text-3xl";
                   metaSize = "text-2xl";
                   priceSize = "text-3xl";
                 }
-                if (count > 26) {
+                if (count > 22) {
                   containerClass = "py-1";
                   nameSize = "text-2xl";
                   metaSize = "text-xl";
@@ -458,11 +458,11 @@ const Board: React.FC = () => {
                   return (
                     <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
                       <div className="flex justify-between items-end mb-1 w-full">
-                        <div className="flex flex-col flex-1 mr-4">
+                        <div className="flex-1 mr-4">
                           <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
                             {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                            {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
                           </span>
-                          {item.isVeg && <span className={`${metaSize} font-bold text-green-500 mt-1`}>WEGE</span>}
                         </div>
                         <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
                       </div>
