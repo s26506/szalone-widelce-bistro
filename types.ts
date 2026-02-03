@@ -57,7 +57,8 @@ export type MenuCategory = 'Zupy' | 'Dodatki' | 'Dania' | 'Pierogi' | 'Sałatki'
 export type SubCategory = 'Zupy' | 'Dania' | 'Dodatki';
 
 export interface DailyMenu {
-  [key: string]: string[]; // category -> array of dish IDs
+  [key: string]: string[] | undefined; // category -> array of dish IDs
+  novelties?: string[]; // List of dish IDs marked as new for this day
 }
 
 export interface FullPlannerState {

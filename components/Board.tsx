@@ -262,6 +262,29 @@ const Board: React.FC = () => {
     }));
   };
 
+  const toggleNovelty = (id: string) => {
+    setPlanner(prev => {
+      const dayPlan = prev[selectedDate] || {};
+      const currentNovelties = dayPlan.novelties || [];
+      const isNew = currentNovelties.includes(id);
+
+      let newNovelties;
+      if (isNew) {
+        newNovelties = currentNovelties.filter(nId => nId !== id);
+      } else {
+        newNovelties = [...currentNovelties, id];
+      }
+
+      return {
+        ...prev,
+        [selectedDate]: {
+          ...dayPlan,
+          novelties: newNovelties
+        }
+      };
+    });
+  };
+
   const handleExport = async (ref: React.RefObject<HTMLDivElement>, filename: string, setLoading: (v: boolean) => void) => {
     if (!ref.current) return;
     setLoading(true);
@@ -336,6 +359,7 @@ const Board: React.FC = () => {
                 const item = availableDishes.find(i => i.id === id);
                 if (!item) return null;
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
+                const isNew = planner[selectedDate]?.novelties?.includes(item.id);
 
                 // Dynamic font sizing based on count
                 const count = ids.length;
@@ -362,11 +386,14 @@ const Board: React.FC = () => {
                     <div className="flex justify-between items-end mb-1 w-full">
                       <div className="flex-1 mr-4">
                         <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                          {item.name}
                           {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
+                          {isNew && <span className={`${metaSize} font-bold text-red-500 ml-3`}>NOWOŚĆ</span>}
                         </span>
                       </div>
-                      <span className={`text-right ${priceSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <span className={`text-right ${priceSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                        {item.price.toFixed(2)}zł<span className={`${metaSize} font-normal normal-case opacity-80`}>/{item.portion}</span>
+                      </span>
                     </div>
                   </div>
                 );
@@ -378,6 +405,7 @@ const Board: React.FC = () => {
                 const item = availableDishes.find(i => i.id === id);
                 if (!item) return null;
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
+                const isNew = planner[selectedDate]?.novelties?.includes(item.id);
 
                 // Dynamic font sizing based on count (Same as Col 1)
                 const count = ids.length;
@@ -404,11 +432,14 @@ const Board: React.FC = () => {
                     <div className="flex justify-between items-end mb-1 w-full">
                       <div className="flex-1 mr-4">
                         <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                          {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>({item.portion})</span>
+                          {item.name}
                           {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
+                          {isNew && <span className={`${metaSize} font-bold text-red-500 ml-3`}>NOWOŚĆ</span>}
                         </span>
                       </div>
-                      <span className={`text-right ${priceSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                      <span className={`text-right ${priceSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                        {item.price.toFixed(2)}zł<span className={`${metaSize} font-normal normal-case opacity-80`}>/{item.portion}</span>
+                      </span>
                     </div>
                   </div>
                 );
@@ -445,6 +476,8 @@ const Board: React.FC = () => {
                   const item = availableDishes.find(i => i.id === id);
                   if (!item) return null;
                   const isSub = isDishInSubscription(selectedDate, 'Zupy', id);
+                  const isNew = planner[selectedDate]?.novelties?.includes(item.id);
+
                   // Font scaling for Zupy
                   const count = zupyIds.length;
                   let containerClass = "py-4";
@@ -460,11 +493,14 @@ const Board: React.FC = () => {
                       <div className="flex justify-between items-end mb-1 w-full">
                         <div className="flex-1 mr-4">
                           <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                            {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                            {item.name}
                             {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
+                            {isNew && <span className={`${metaSize} font-bold text-red-500 ml-3`}>NOWOŚĆ</span>}
                           </span>
                         </div>
-                        <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                        <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.price.toFixed(2)}zł<span className={`${metaSize} font-normal normal-case opacity-80`}>/{item.portion}</span>
+                        </span>
                       </div>
                     </div>
                   );
@@ -485,6 +521,8 @@ const Board: React.FC = () => {
                   const item = availableDishes.find(i => i.id === id);
                   if (!item) return null;
                   const isSub = isDishInSubscription(selectedDate, 'Dodatki', id);
+                  const isNew = planner[selectedDate]?.novelties?.includes(item.id);
+
                   // Font scaling for Dodatki matches Zupy logic roughly or independent
                   const count = dodatkiIds.length;
                   let containerClass = "py-4";
@@ -498,13 +536,16 @@ const Board: React.FC = () => {
                   return (
                     <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
                       <div className="flex justify-between items-end mb-1 w-full">
-                        <div className="flex flex-col flex-1 mr-4">
+                        <div className="flex-1 mr-4">
                           <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
-                            {item.name} <span className={`${metaSize} font-normal normal-case ${isSub ? 'text-[#F4D03F]' : 'text-white/80'}`}>({item.portion})</span>
+                            {item.name}
+                            {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
+                            {isNew && <span className={`${metaSize} font-bold text-red-500 ml-3`}>NOWOŚĆ</span>}
                           </span>
-                          {item.isVeg && <span className={`${metaSize} font-bold text-green-500 mt-1`}>WEGE</span>}
                         </div>
-                        <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>{item.price.toFixed(2)} zł</span>
+                        <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                          {item.price.toFixed(2)}zł<span className={`${metaSize} font-normal normal-case opacity-80`}>/{item.portion}</span>
+                        </span>
                       </div>
                     </div>
                   );
@@ -663,6 +704,17 @@ const Board: React.FC = () => {
 
                                 <button onClick={() => removeDishFromPlan(cat, id)} className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-all">
                                   <Trash2 size={12} />
+                                </button>
+
+                                <button
+                                  onClick={() => toggleNovelty(id)}
+                                  className={`p-1 rounded-md transition-all ${planner[selectedDate]?.novelties?.includes(id)
+                                      ? 'text-red-600 bg-red-50 font-bold'
+                                      : 'text-gray-300 hover:text-red-400 hover:bg-red-50'
+                                    }`}
+                                  title="Oznacz jako NOWOŚĆ"
+                                >
+                                  N
                                 </button>
 
                               </div>
