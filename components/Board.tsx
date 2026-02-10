@@ -383,26 +383,26 @@ const Board: React.FC = () => {
       nameSize = "text-6xl";
       metaSize = "text-5xl"; // bumped
       priceSize = "text-6xl";
-    } else if (colUnits <= 8.5) {
-      // Sparse (e.g. 5-6 items/col)
+    } else if (colUnits <= 9.0) {
+      // Sparse (e.g. 5-7 items/col)
       containerClass = "py-6";
       nameSize = "text-5xl";
       metaSize = "text-4xl";
       priceSize = "text-5xl";
-    } else if (colUnits <= 12.5) {
-      // Standard (e.g. 7-9 items/col)
+    } else if (colUnits <= 14.5) {
+      // Standard (e.g. 8-11 items/col)
       containerClass = "py-3";
       nameSize = "text-4xl";
       metaSize = "text-3xl";
       priceSize = "text-4xl";
-    } else if (colUnits <= 18) {
-      // Dense
+    } else if (colUnits <= 21.0) {
+      // Dense (e.g. 12-16 items/col) - Extended range for 3xl
       containerClass = "py-2";
       nameSize = "text-3xl";
       metaSize = "text-2xl";
       priceSize = "text-3xl";
     } else {
-      // Very Dense (>18 lines/col)
+      // Very Dense (>21 units/col)
       containerClass = "py-1";
       nameSize = "text-2xl";
       metaSize = "text-xl";
@@ -473,7 +473,7 @@ const Board: React.FC = () => {
 
               {/* LEGEND - BOTTOM of Flex Container (Static) */}
               <div className="mt-auto pb-4 pr-12 text-right">
-                <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
+                <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
               </div>
             </div>
           </div>
@@ -582,7 +582,7 @@ const Board: React.FC = () => {
                   );
                 })}
                 <div className="mt-auto pt-8 text-right">
-                  <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
+                  <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
                 </div>
               </div>
             </div>
