@@ -344,6 +344,71 @@ const Board: React.FC = () => {
     const col1 = ids.slice(0, half);
     const col2 = ids.slice(half);
 
+    // --- LAYOUT CALCULATION (Centralized) ---
+    // Calculate Layout Units (1 unit = 1 line approx)
+    // ULTRA AGGRESSIVE SCORING: 1 unit = ~1 visual line.
+    // Wrapped lines cost almost a full unit.
+    const totalUnits = ids.reduce((acc, currId) => {
+      const i = availableDishes.find(d => d.id === currId);
+      if (!i) return acc;
+      let u = 1; // Base title line
+
+      // Strict wrapping detection for large fonts
+      // Assuming chars per line roughly ~20-25 for text-4xl/5xl
+      if (i.name.length > 22) u += 0.95; // 2nd line
+      if (i.name.length > 44) u += 0.95; // 3rd line
+      if (i.name.length > 66) u += 0.95; // 4th line
+
+      // Add margin/padding 'cost'
+      u += 0.2;
+
+      return acc + u;
+    }, 0);
+
+    const colUnits = totalUnits / 2;
+
+    let containerClass = "py-4";
+    let nameSize = "text-4xl";
+    let metaSize = "text-3xl";
+    let priceSize = "text-4xl";
+
+    // Thresholds for 1080p height
+    // We have ~900px usable height (minus header/footer/padding)
+    // text-4xl item (2 lines) is approx 130px. 900/130 = ~7 items. 
+    // If colUnits > 7, we are in danger zone for text-4xl.
+
+    if (colUnits <= 5.5) {
+      // Extremely sparse (e.g. 3-4 items/col)
+      containerClass = "py-8";
+      nameSize = "text-6xl";
+      metaSize = "text-5xl"; // bumped
+      priceSize = "text-6xl";
+    } else if (colUnits <= 8.5) {
+      // Sparse (e.g. 5-6 items/col)
+      containerClass = "py-6";
+      nameSize = "text-5xl";
+      metaSize = "text-4xl";
+      priceSize = "text-5xl";
+    } else if (colUnits <= 12.5) {
+      // Standard (e.g. 7-9 items/col)
+      containerClass = "py-3";
+      nameSize = "text-4xl";
+      metaSize = "text-3xl";
+      priceSize = "text-4xl";
+    } else if (colUnits <= 18) {
+      // Dense
+      containerClass = "py-2";
+      nameSize = "text-3xl";
+      metaSize = "text-2xl";
+      priceSize = "text-3xl";
+    } else {
+      // Very Dense (>18 lines/col)
+      containerClass = "py-1";
+      nameSize = "text-2xl";
+      metaSize = "text-xl";
+      priceSize = "text-2xl";
+    }
+
     return (
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
         <div ref={daniaExportRef} style={{ width: '1920px', height: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans relative overflow-hidden">
@@ -352,7 +417,7 @@ const Board: React.FC = () => {
             DANIA GŁÓWNE:
           </h1>
 
-          <div className="flex-grow flex gap-12 h-full">
+          <div className="flex-grow flex gap-12 h-full pb-20">
             {/* Col 1 */}
             <div className="w-1/2 flex flex-col gap-0 border-r border-white/20 pr-12 h-full">
               {col1.map(id => {
@@ -360,26 +425,6 @@ const Board: React.FC = () => {
                 if (!item) return null;
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
                 const isNew = planner[selectedDate]?.novelties?.includes(item.id);
-
-                // Dynamic font sizing based on count
-                const count = ids.length;
-                let containerClass = "py-4";
-                let nameSize = "text-4xl";
-                let metaSize = "text-3xl";
-                let priceSize = "text-4xl";
-
-                if (count > 14) {
-                  containerClass = "py-2";
-                  nameSize = "text-3xl";
-                  metaSize = "text-2xl";
-                  priceSize = "text-3xl";
-                }
-                if (count > 22) {
-                  containerClass = "py-1";
-                  nameSize = "text-2xl";
-                  metaSize = "text-xl";
-                  priceSize = "text-2xl";
-                }
 
                 return (
                   <div key={id} className={`border-b border-white flex flex-col justify-center ${containerClass}`}>
@@ -407,26 +452,7 @@ const Board: React.FC = () => {
                 const isSub = isDishInSubscription(selectedDate, 'Dania', id);
                 const isNew = planner[selectedDate]?.novelties?.includes(item.id);
 
-                // Dynamic font sizing based on count (Same as Col 1)
-                const count = ids.length;
-                let containerClass = "py-4";
-                let nameSize = "text-4xl";
-                let metaSize = "text-3xl";
-                let priceSize = "text-4xl";
-
-                if (count > 14) {
-                  containerClass = "py-2";
-                  nameSize = "text-3xl";
-                  metaSize = "text-2xl";
-                  priceSize = "text-3xl";
-                }
-                if (count > 22) {
-                  containerClass = "py-1";
-                  nameSize = "text-2xl";
-                  metaSize = "text-xl";
-                  priceSize = "text-2xl";
-                }
-
+                // Uses same calculated styles as Col 1
                 return (
                   <div key={id} className={`border-b border-white flex flex-col justify-center ${containerClass}`}>
                     <div className="flex justify-between items-end mb-1 w-full">
@@ -445,8 +471,8 @@ const Board: React.FC = () => {
                 );
               })}
 
-              {/* LEGEND - BOTTOM RIGHT OF RIGHT COLUMN */}
-              <div className="absolute bottom-4 right-0 text-right">
+              {/* LEGEND - BOTTOM of Flex Container (Static) */}
+              <div className="mt-auto pb-4 pr-12 text-right">
                 <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
               </div>
             </div>
@@ -508,15 +534,20 @@ const Board: React.FC = () => {
               </div>
             </div>
 
-            {/* Vertical Separator */}
-            <div className="w-px bg-white/30 h-full"></div>
+            {/* VERTICAL DIVIDER & DODATKI COLUMN */}
+            <div className="w-px bg-white/30 h-full mx-8"></div>
 
             {/* DODATKI COLUMN */}
-            <div className="w-1/2 flex flex-col h-full">
+            <div className="w-1/2 flex flex-col h-full overflow-hidden">
+              {/* ... existing Dodatki code ... */}
+              {/* We need to restructure Zupy/Dodatki export to support footer at bottom of Zupy/Dodatki container? */}
+              {/* Currently Zupy and Dodatki are side-by-side. The footer is absolute. */}
+              {/* To make it safe, we can put the footer in the right column (Dodatki) at the bottom? */}
+              {/* Yes, putting it in Dodatki column is safest layout-wise. */}
               <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
                 DODATKI:
               </h1>
-              <div className="flex flex-col gap-0">
+              <div className="flex flex-col gap-0 flex-grow">
                 {dodatkiIds.map(id => {
                   const item = availableDishes.find(i => i.id === id);
                   if (!item) return null;
@@ -550,14 +581,11 @@ const Board: React.FC = () => {
                     </div>
                   );
                 })}
+                <div className="mt-auto pt-8 text-right">
+                  <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
+                </div>
               </div>
             </div>
-
-          </div>
-
-          {/* LEGEND - BOTTOM RIGHT (Absolute within the layout container) */}
-          <div className="absolute bottom-12 right-12">
-            <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
           </div>
         </div>
       </div>
@@ -709,8 +737,8 @@ const Board: React.FC = () => {
                                 <button
                                   onClick={() => toggleNovelty(id)}
                                   className={`p-1 rounded-md transition-all ${planner[selectedDate]?.novelties?.includes(id)
-                                      ? 'text-red-600 bg-red-50 font-bold'
-                                      : 'text-gray-300 hover:text-red-400 hover:bg-red-50'
+                                    ? 'text-red-600 bg-red-50 font-bold'
+                                    : 'text-gray-300 hover:text-red-400 hover:bg-red-50'
                                     }`}
                                   title="Oznacz jako NOWOŚĆ"
                                 >
