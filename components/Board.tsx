@@ -377,32 +377,32 @@ const Board: React.FC = () => {
     // text-4xl item (2 lines) is approx 130px. 900/130 = ~7 items. 
     // If colUnits > 7, we are in danger zone for text-4xl.
 
-    if (colUnits <= 5.5) {
-      // Extremely sparse (e.g. 3-4 items/col)
+    if (colUnits <= 6.0) {
+      // Extremely sparse (e.g. 3 items/col)
       containerClass = "py-8";
       nameSize = "text-6xl";
-      metaSize = "text-5xl"; // bumped
+      metaSize = "text-5xl";
       priceSize = "text-6xl";
-    } else if (colUnits <= 9.0) {
-      // Sparse (e.g. 5-7 items/col)
+    } else if (colUnits <= 10.0) {
+      // Sparse (e.g. 4-5 items/col) - Relaxed to allow 5xl longer
       containerClass = "py-6";
       nameSize = "text-5xl";
       metaSize = "text-4xl";
       priceSize = "text-5xl";
-    } else if (colUnits <= 14.5) {
-      // Standard (e.g. 8-11 items/col)
-      containerClass = "py-3";
+    } else if (colUnits <= 19.0) {
+      // Standard (e.g. 6-9 items/col) - Relaxed significantly
+      containerClass = "py-4"; // Increased padding
       nameSize = "text-4xl";
       metaSize = "text-3xl";
       priceSize = "text-4xl";
-    } else if (colUnits <= 21.0) {
-      // Dense (e.g. 12-16 items/col) - Extended range for 3xl
+    } else if (colUnits <= 25.0) {
+      // Dense (e.g. 10-12 items/col)
       containerClass = "py-2";
       nameSize = "text-3xl";
       metaSize = "text-2xl";
       priceSize = "text-3xl";
     } else {
-      // Very Dense (>21 units/col)
+      // Very Dense (>22 units/col)
       containerClass = "py-1";
       nameSize = "text-2xl";
       metaSize = "text-xl";
@@ -471,8 +471,8 @@ const Board: React.FC = () => {
                 );
               })}
 
-              {/* LEGEND - BOTTOM of Flex Container (Static) */}
-              <div className="mt-auto pb-4 pr-12 text-right">
+              {/* LEGEND - ABSOLUTE BOTTOM RIGHT (Static) */}
+              <div className="absolute bottom-12 right-12 text-right">
                 <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
               </div>
             </div>
@@ -581,9 +581,11 @@ const Board: React.FC = () => {
                     </div>
                   );
                 })}
-                <div className="mt-auto pt-8 text-right">
-                  <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
-                </div>
+              </div>
+
+              {/* LEGEND - ABSOLUTE BOTTOM RIGHT (Static) */}
+              <div className="absolute bottom-12 right-12 text-right">
+                <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
               </div>
             </div>
           </div>
