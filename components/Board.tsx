@@ -389,24 +389,25 @@ const Board: React.FC = () => {
       nameSize = "text-5xl";
       metaSize = "text-4xl";
       priceSize = "text-5xl";
-    } else if (colUnits <= 10.5) { // Tightened significantly
-      // Standard (e.g. 6-8 items/col)
-      containerClass = "py-3";
+    } else if (colUnits <= 10.0) {
+      // Standard (e.g. 6-7 items/col)
+      containerClass = "py-4"; // Comfortable padding
       nameSize = "text-4xl";
       metaSize = "text-3xl";
       priceSize = "text-4xl";
-    } else if (colUnits <= 14.5) {
-      // Dense (e.g. 9-12 items/col) - Forces 3xl for 17 items (8.5 units)
-      containerClass = "py-2";
-      nameSize = "text-3xl";
+    } else if (colUnits <= 18.5) {
+      // Danger Zone (e.g. 8-12 items/col with wrapping)
+      // KEEP LARGE FONT but SQUEEZE VERTICALLY
+      containerClass = "py-1"; // Minimal padding to fit 17 items
+      nameSize = "text-4xl";   // Stay large
+      metaSize = "text-3xl";
+      priceSize = "text-4xl";
+    } else {
+      // Very Dense (>18.5 units/col)
+      containerClass = "py-1";
+      nameSize = "text-3xl"; // Drop to 3xl
       metaSize = "text-2xl";
       priceSize = "text-3xl";
-    } else {
-      // Very Dense (>14.5 units/col)
-      containerClass = "py-1";
-      nameSize = "text-2xl";
-      metaSize = "text-xl";
-      priceSize = "text-2xl";
     }
 
     return (
@@ -470,12 +471,12 @@ const Board: React.FC = () => {
                   </div>
                 );
               })}
-
-              {/* LEGEND - ABSOLUTE BOTTOM RIGHT (Static) */}
-              <div className="absolute bottom-4 right-12 text-right">
-                <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
-              </div>
             </div>
+          </div>
+
+          {/* LEGEND - ABSOLUTE BOTTOM RIGHT (Global for 1080p container) */}
+          <div className="absolute bottom-6 right-12 text-right">
+            <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
           </div>
         </div>
       </div>
