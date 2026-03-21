@@ -122,7 +122,7 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
                                     setNewDish(prev => ({
                                         ...prev,
                                         category: newCat,
-                                        isSubDaily: !['Zupy', 'Dania', 'Dodatki'].includes(newCat) ? false : prev.isSubDaily
+                                        isSubDaily: !['Zupy', 'Dania', 'Dodatki', 'Pierogi'].includes(newCat) ? false : prev.isSubDaily
                                     }));
                                 }}
                                 className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#C32026] outline-none"
@@ -180,12 +180,12 @@ const DishFormModal: React.FC<DishFormModalProps> = ({ isOpen, onClose, initialD
                             />
                             <span className="text-sm font-medium text-gray-700">Stałe w Menu</span>
                         </label>
-                        <label className={`flex items-center gap-2 ${['Zupy', 'Dania', 'Dodatki'].includes(newDish.category) ? 'cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}>
+                        <label className={`flex items-center gap-2 ${['Zupy', 'Dania', 'Dodatki', 'Pierogi'].includes(newDish.category) ? 'cursor-pointer' : 'opacity-40 cursor-not-allowed'}`}>
                             <input
                                 type="checkbox"
                                 checked={newDish.isSubDaily}
                                 onChange={e => setNewDish({ ...newDish, isSubDaily: e.target.checked })}
-                                disabled={!['Zupy', 'Dania', 'Dodatki'].includes(newDish.category)}
+                                disabled={!['Zupy', 'Dania', 'Dodatki', 'Pierogi'].includes(newDish.category)}
                                 className="w-5 h-5 rounded text-[#C32026] focus:ring-[#C32026]"
                             />
                             <span className="text-sm font-medium text-gray-700">Stałe w Abon.</span>

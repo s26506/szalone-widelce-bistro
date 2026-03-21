@@ -1,4 +1,4 @@
-﻿
+
 interface MenuProps {
   apiEndpoint: string;
   mode: 'daily' | 'subscription';
@@ -148,7 +148,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
     const updates: any = { ...planner[selectedDate] };
 
     // Determine categories based on mode
-    const cats = isSubscriptionMode ? ['Zupy', 'Dania', 'Dodatki'] : CATEGORIES;
+    const cats = isSubscriptionMode ? ['Zupy', 'Dania', 'Dodatki', 'Pierogi'] : CATEGORIES;
 
     cats.forEach((cat: any) => {
       const currentIds = updates[cat] || [];
@@ -354,11 +354,11 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
 
   // Filter categories and determine grid layout
   const displayedCategories: MenuCategory[] = isSubscriptionMode
-    ? ['Zupy', 'Dania', 'Dodatki']
+    ? ['Zupy', 'Dania', 'Dodatki', 'Pierogi']
     : CATEGORIES;
 
   const gridColsClass = isSubscriptionMode
-    ? "grid-cols-1 md:grid-cols-3"
+    ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-4"
     : "grid-cols-1 md:grid-cols-2 lg:grid-cols-5";
 
   // Helper to remove price/weight info from names for Subscription Export
@@ -416,7 +416,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                     </h2>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-12 items-start w-full px-8">
+                  <div className="grid grid-cols-4 gap-8 items-start w-full px-8">
                     {/* ZUPY */}
                     <div className="flex flex-col gap-4">
                       <h3 className="text-4xl mb-4 text-white text-center opacity-90 font-serif tracking-wider font-bold">Zupy</h3>
@@ -457,6 +457,23 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                       <h3 className="text-4xl mb-4 text-white text-center opacity-90 font-serif tracking-wider font-bold">Dodatki</h3>
                       <ul className="space-y-0 font-sans font-light tracking-wide text-2xl">
                         {getEffectiveDayPlanIds(selectedDate, 'Dodatki').map(id => {
+                          const item = availableDishes.find(i => i.id === id);
+                          if (!item) return null;
+                          return (
+                            <li key={id} className="text-white/90 text-left py-2 border-b border-white/20 last:border-0 font-bold block">
+                              {cleanDishName(item.name)}
+                              {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+
+                    {/* PIEROGI */}
+                    <div className="flex flex-col gap-4">
+                      <h3 className="text-4xl mb-4 text-white text-center opacity-90 font-serif tracking-wider font-bold">Pierogi</h3>
+                      <ul className="space-y-0 font-sans font-light tracking-wide text-2xl">
+                        {getEffectiveDayPlanIds(selectedDate, 'Pierogi').map(id => {
                           const item = availableDishes.find(i => i.id === id);
                           if (!item) return null;
                           return (

@@ -125,7 +125,7 @@ const Board: React.FC = () => {
         alert('Brak zaplanowanego menu w tym dniu.');
         return;
       }
-      const relevantCategories: MenuCategory[] = ['Zupy', 'Dania', 'Dodatki'];
+      const relevantCategories: MenuCategory[] = ['Zupy', 'Dania', 'Dodatki', 'Pierogi'];
       const newDayPlan: any = {};
       relevantCategories.forEach(cat => {
         if (dayMenu[cat]) {
@@ -326,7 +326,7 @@ const Board: React.FC = () => {
 
 
 
-  const allCategories: MenuCategory[] = ['Zupy', 'Dania', 'Dodatki'];
+  const allCategories: MenuCategory[] = ['Zupy', 'Dania', 'Dodatki', 'Pierogi'];
 
   const isDishInSubscription = (date: string, category: MenuCategory, dishId: string) => {
     if (!subscriptionPlanner[date]) return false;
@@ -414,7 +414,7 @@ const Board: React.FC = () => {
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
         <div ref={daniaExportRef} style={{ width: '1920px', height: '1080px' }} className="bg-black text-white p-12 flex flex-col font-sans relative overflow-hidden">
           {/* Header */}
-          <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
+          <h1 className="text-6xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
             DANIA GŁÓWNE:
           </h1>
 
@@ -487,6 +487,7 @@ const Board: React.FC = () => {
   const renderZupyExport = () => {
     const zupyIds = getEffectiveDayPlanIds(selectedDate, 'Zupy');
     const dodatkiIds = getEffectiveDayPlanIds(selectedDate, 'Dodatki');
+    const pierogiIds = getEffectiveDayPlanIds(selectedDate, 'Pierogi');
 
     return (
       <div style={{ position: 'fixed', left: '-9999px', top: 0 }}>
@@ -495,7 +496,7 @@ const Board: React.FC = () => {
 
             {/* ZUPY COLUMN */}
             <div className="w-1/2 flex flex-col h-full">
-              <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
+              <h1 className="text-6xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
                 ZUPY:
               </h1>
               <div className="flex flex-col gap-0">
@@ -545,7 +546,7 @@ const Board: React.FC = () => {
               {/* Currently Zupy and Dodatki are side-by-side. The footer is absolute. */}
               {/* To make it safe, we can put the footer in the right column (Dodatki) at the bottom? */}
               {/* Yes, putting it in Dodatki column is safest layout-wise. */}
-              <h1 className="text-8xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
+              <h1 className="text-6xl font-['Playfair_Display'] font-bold mb-4 uppercase tracking-wider text-white border-b-4 border-white pb-4">
                 DODATKI:
               </h1>
               <div className="flex flex-col gap-0 flex-grow">
@@ -555,15 +556,15 @@ const Board: React.FC = () => {
                   const isSub = isDishInSubscription(selectedDate, 'Dodatki', id);
                   const isNew = planner[selectedDate]?.novelties?.includes(item.id);
 
-                  // Font scaling for Dodatki matches Zupy logic roughly or independent
-                  const count = dodatkiIds.length;
+                  // Font scaling for Dodatki + Pierogi
+                  const count = dodatkiIds.length + pierogiIds.length + 3; // +3 extra for Pierogi header
                   let containerClass = "py-4";
                   let nameSize = "text-4xl";
                   let metaSize = "text-3xl";
 
                   if (count > 8) { containerClass = "py-2"; }
                   if (count > 12) { containerClass = "py-1"; nameSize = "text-3xl"; metaSize = "text-2xl"; }
-
+                  if (count > 16) { containerClass = "py-[2px]"; nameSize = "text-2xl"; metaSize = "text-xl"; }
 
                   return (
                     <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
@@ -582,6 +583,44 @@ const Board: React.FC = () => {
                     </div>
                   );
                 })}
+
+                <>
+                  <h1 className={`font-['Playfair_Display'] font-bold mb-4 mt-8 uppercase tracking-wider text-white border-b-4 border-white pb-4 ${dodatkiIds.length + pierogiIds.length > 12 ? 'text-5xl' : 'text-6xl'}`}>
+                    PIEROGI:
+                  </h1>
+                  {pierogiIds.map(id => {
+                    const item = availableDishes.find(i => i.id === id);
+                    if (!item) return null;
+                    const isSub = isDishInSubscription(selectedDate, 'Pierogi', id);
+                    const isNew = planner[selectedDate]?.novelties?.includes(item.id);
+
+                    const count = dodatkiIds.length + pierogiIds.length + 3;
+                    let containerClass = "py-4";
+                    let nameSize = "text-4xl";
+                    let metaSize = "text-3xl";
+
+                    if (count > 8) { containerClass = "py-2"; }
+                    if (count > 12) { containerClass = "py-1"; nameSize = "text-3xl"; metaSize = "text-2xl"; }
+                    if (count > 16) { containerClass = "py-[2px]"; nameSize = "text-2xl"; metaSize = "text-xl"; }
+
+                    return (
+                      <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
+                        <div className="flex justify-between items-end mb-1 w-full">
+                          <div className="flex-1 mr-4">
+                            <span className={`${nameSize} font-bold uppercase tracking-wide leading-tight ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                              {item.name}
+                              {item.isVeg && <span className={`${metaSize} font-bold text-green-500 ml-3`}>WEGE</span>}
+                              {isNew && <span className={`${metaSize} font-bold text-red-500 ml-3`}>NOWOŚĆ</span>}
+                            </span>
+                          </div>
+                          <span className={`text-right ${nameSize} font-bold whitespace-nowrap mb-1 ${isSub ? 'text-[#F4D03F]' : 'text-white'}`}>
+                            {item.price.toFixed(2)}zł<span className={`${metaSize} font-normal normal-case opacity-80`}>/{item.portion}</span>
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
               </div>
 
               {/* LEGEND - ABSOLUTE BOTTOM RIGHT (Static) */}
@@ -687,7 +726,7 @@ const Board: React.FC = () => {
       </div>
 
       {/* Categories Grid (Bottom) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {allCategories.map(cat => {
           const dishIds = getEffectiveDayPlanIds(selectedDate, cat);
           return (

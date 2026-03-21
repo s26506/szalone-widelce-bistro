@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import DishFormModal from './DishFormModal';
 
-const SUB_CATEGORIES: SubCategory[] = ['Zupy', 'Dania', 'Dodatki'];
+const SUB_CATEGORIES: SubCategory[] = ['Zupy', 'Dania', 'Dodatki', 'Pierogi'];
 
 const getLocalDateString = (date: Date) => {
   const year = date.getFullYear();
@@ -258,7 +258,7 @@ const Subscription: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {SUB_CATEGORIES.map(cat => {
           const dishIds = getEffectiveSubPlanIds(selectedDate, cat);
           return (

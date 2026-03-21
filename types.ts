@@ -54,7 +54,7 @@ export interface DishGalleryItem {
 }
 
 export type MenuCategory = 'Zupy' | 'Dodatki' | 'Dania' | 'Pierogi' | 'Sałatki';
-export type SubCategory = 'Zupy' | 'Dania' | 'Dodatki';
+export type SubCategory = 'Zupy' | 'Dania' | 'Dodatki' | 'Pierogi';
 
 export interface DailyMenu {
   [key: string]: string[] | undefined; // category -> array of dish IDs
