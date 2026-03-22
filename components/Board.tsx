@@ -476,7 +476,7 @@ const Board: React.FC = () => {
 
           {/* LEGEND - ABSOLUTE BOTTOM RIGHT (Global for 1080p container) */}
           <div className="absolute bottom-6 right-12 text-right">
-            <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
+            <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
           </div>
         </div>
       </div>
@@ -585,7 +585,7 @@ const Board: React.FC = () => {
                 })}
 
                 <>
-                  <h1 className={`font-['Playfair_Display'] font-bold mb-4 mt-8 uppercase tracking-wider text-white border-b-4 border-white pb-4 ${dodatkiIds.length + pierogiIds.length > 12 ? 'text-5xl' : 'text-6xl'}`}>
+                  <h1 className="font-['Playfair_Display'] font-bold mb-4 mt-8 uppercase tracking-wider text-white border-b-4 border-white pb-4 text-6xl">
                     PIEROGI:
                   </h1>
                   {pierogiIds.map(id => {
@@ -625,7 +625,7 @@ const Board: React.FC = () => {
 
               {/* LEGEND - ABSOLUTE BOTTOM RIGHT (Static) */}
               <div className="absolute bottom-4 right-12 text-right">
-                <span className="text-2xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
+                <span className="text-4xl font-extrabold text-[#F4D03F]">ŻÓŁTY - DANIA ABONAMENTOWE</span>
               </div>
             </div>
           </div>
