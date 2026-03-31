@@ -558,13 +558,13 @@ const Board: React.FC = () => {
 
                   // Font scaling for Dodatki + Pierogi
                   const count = dodatkiIds.length + pierogiIds.length + 3; // +3 extra for Pierogi header
-                  let containerClass = "py-4";
-                  let nameSize = "text-4xl";
-                  let metaSize = "text-3xl";
+                  let containerClass = "py-3";
+                  let nameSize = "text-5xl";
+                  let metaSize = "text-4xl";
 
-                  if (count > 8) { containerClass = "py-2"; }
-                  if (count > 12) { containerClass = "py-1"; nameSize = "text-3xl"; metaSize = "text-2xl"; }
-                  if (count > 16) { containerClass = "py-[2px]"; nameSize = "text-2xl"; metaSize = "text-xl"; }
+                  if (count > 10) { containerClass = "py-2"; nameSize = "text-4xl"; metaSize = "text-3xl"; }
+                  if (count > 14) { containerClass = "py-[2px]"; nameSize = "text-[32px] leading-[36px]"; metaSize = "text-[28px] leading-[32px]"; }
+                  if (count > 18) { containerClass = "py-0"; nameSize = "text-[26px] leading-[30px]"; metaSize = "text-[22px] leading-[26px]"; }
 
                   return (
                     <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
@@ -595,13 +595,13 @@ const Board: React.FC = () => {
                     const isNew = planner[selectedDate]?.novelties?.includes(item.id);
 
                     const count = dodatkiIds.length + pierogiIds.length + 3;
-                    let containerClass = "py-4";
-                    let nameSize = "text-4xl";
-                    let metaSize = "text-3xl";
+                    let containerClass = "py-3";
+                    let nameSize = "text-5xl";
+                    let metaSize = "text-4xl";
 
-                    if (count > 8) { containerClass = "py-2"; }
-                    if (count > 12) { containerClass = "py-1"; nameSize = "text-3xl"; metaSize = "text-2xl"; }
-                    if (count > 16) { containerClass = "py-[2px]"; nameSize = "text-2xl"; metaSize = "text-xl"; }
+                    if (count > 10) { containerClass = "py-2"; nameSize = "text-4xl"; metaSize = "text-3xl"; }
+                    if (count > 14) { containerClass = "py-[2px]"; nameSize = "text-[32px] leading-[36px]"; metaSize = "text-[28px] leading-[32px]"; }
+                    if (count > 18) { containerClass = "py-0"; nameSize = "text-[26px] leading-[30px]"; metaSize = "text-[22px] leading-[26px]"; }
 
                     return (
                       <div key={id} className={`border-b border-white flex flex-col ${containerClass}`}>
