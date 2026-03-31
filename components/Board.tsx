@@ -404,10 +404,10 @@ const Board: React.FC = () => {
       priceSize = "text-4xl";
     } else {
       // Very Dense (>20.5 units/col)
-      containerClass = "py-1";
-      nameSize = "text-3xl"; // Drop to 3xl
-      metaSize = "text-2xl";
-      priceSize = "text-3xl";
+      containerClass = "py-0";
+      nameSize = "text-[34px] leading-[38px]"; 
+      metaSize = "text-[28px] leading-[32px]";
+      priceSize = "text-[34px] leading-[38px]";
     }
 
     return (
