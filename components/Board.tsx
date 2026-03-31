@@ -355,9 +355,9 @@ const Board: React.FC = () => {
 
       // Strict wrapping detection for large fonts
       // Assuming chars per line roughly ~20-25 for text-4xl/5xl
-      if (i.name.length > 22) u += 0.95; // 2nd line
-      if (i.name.length > 44) u += 0.95; // 3rd line
-      if (i.name.length > 66) u += 0.95; // 4th line
+      if (i.name.length > 24) u += 0.95; // 2nd line
+      if (i.name.length > 48) u += 0.95; // 3rd line
+      if (i.name.length > 72) u += 0.95; // 4th line
 
       // Add margin/padding 'cost'
       u += 0.2;
