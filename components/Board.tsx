@@ -395,7 +395,7 @@ const Board: React.FC = () => {
       nameSize = "text-4xl";
       metaSize = "text-3xl";
       priceSize = "text-4xl";
-    } else if (colUnits <= 18.5) {
+    } else if (colUnits <= 20.5) {
       // Danger Zone (e.g. 8-12 items/col with wrapping)
       // KEEP LARGE FONT but SQUEEZE VERTICALLY
       containerClass = "py-1"; // Minimal padding to fit 17 items
@@ -403,7 +403,7 @@ const Board: React.FC = () => {
       metaSize = "text-3xl";
       priceSize = "text-4xl";
     } else {
-      // Very Dense (>18.5 units/col)
+      // Very Dense (>20.5 units/col)
       containerClass = "py-1";
       nameSize = "text-3xl"; // Drop to 3xl
       metaSize = "text-2xl";
