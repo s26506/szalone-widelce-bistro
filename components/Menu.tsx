@@ -511,14 +511,14 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
                                 return (
-                                  <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                    <div className="text-left flex-grow min-w-0">
+                                  <li key={id} className="grid grid-cols-[1fr_auto] gap-4 items-end border-b border-white/10 pb-1">
+                                    <div className="text-left min-w-0">
                                       <span className="text-white/90 font-bold leading-tight decoration-clone">
                                         {item.name}
                                         {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                                       </span>
                                     </div>
-                                    <span className="text-white/90 ml-4 whitespace-nowrap flex-shrink-0">{item.price.toFixed(2)}zł/{item.portion}</span>
+                                    <span className="text-white/90 text-right whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                   </li>
                                 );
                               })}
@@ -539,14 +539,14 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                               const item = availableDishes.find(i => i.id === id);
                               if (!item) return null;
                               return (
-                                <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                  <div className="text-left flex-grow min-w-0">
+                                <li key={id} className="grid grid-cols-[1fr_auto] gap-4 items-end border-b border-white/10 pb-1">
+                                  <div className="text-left min-w-0">
                                     <span className="text-white/90 font-bold leading-tight decoration-clone">
                                       {item.name}
                                       {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                                     </span>
                                   </div>
-                                  <span className="text-white/90 ml-4 whitespace-nowrap flex-shrink-0">{item.price.toFixed(2)}zł/{item.portion}</span>
+                                  <span className="text-white/90 text-right whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                 </li>
                               );
                             })}
@@ -562,14 +562,14 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
                                 return (
-                                  <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                    <div className="text-left flex-grow min-w-0">
+                                  <li key={id} className="grid grid-cols-[1fr_auto] gap-4 items-end border-b border-white/10 pb-1">
+                                    <div className="text-left min-w-0">
                                       <span className="text-white/90 font-bold leading-tight decoration-clone">
                                         {item.name}
                                         {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                                       </span>
                                     </div>
-                                    <span className="text-white/90 ml-4 whitespace-nowrap flex-shrink-0">{item.price.toFixed(2)}zł/{item.portion}</span>
+                                    <span className="text-white/90 text-right whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                   </li>
                                 );
                               })}
@@ -586,14 +586,14 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
                                 return (
-                                  <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                    <div className="text-left flex-grow min-w-0">
+                                  <li key={id} className="grid grid-cols-[1fr_auto] gap-4 items-end border-b border-white/10 pb-1">
+                                    <div className="text-left min-w-0">
                                       <span className="text-white/80 font-bold leading-tight decoration-clone">
                                         {item.name}
                                         {item.isVeg && <span className="text-[#C32026] text-[0.7em] font-black ml-2 align-middle">WEGE</span>}
                                       </span>
                                     </div>
-                                    <span className="text-white/80 ml-4 whitespace-nowrap flex-shrink-0">{item.price.toFixed(2)}zł/{item.portion}</span>
+                                    <span className="text-white/80 text-right whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                   </li>
                                 );
                               })}
@@ -610,14 +610,14 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
                                 return (
-                                  <li key={id} className="flex justify-between items-end border-b border-white/10 pb-1">
-                                    <div className="text-left flex-grow min-w-0">
+                                  <li key={id} className="grid grid-cols-[1fr_auto] gap-4 items-end border-b border-white/10 pb-1">
+                                    <div className="text-left min-w-0">
                                       <span className="text-white/80 font-bold leading-tight decoration-clone">
                                         {item.name}
                                         {item.isVeg && <span className="text-[#C32026] text-xs ml-2 font-black align-middle">WEGE</span>}
                                       </span>
                                     </div>
-                                    <span className="text-white/80 ml-4 whitespace-nowrap flex-shrink-0">{item.price.toFixed(2)}zł/{item.portion}</span>
+                                    <span className="text-white/80 text-right whitespace-nowrap">{item.price.toFixed(2)}zł/{item.portion}</span>
                                   </li>
                                 );
                               })}
