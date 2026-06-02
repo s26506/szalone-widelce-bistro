@@ -480,7 +480,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                 </div>
               ) : (
                 /* --- UKŁAD STANDARDOWY (DAILY MENU) --- */
-                <div className="grid grid-cols-[1fr_1.4fr_1fr] gap-8 auto-rows-min">
+                <div className="grid grid-cols-[1.1fr_1.2fr_1.1fr] gap-4 auto-rows-min">
                   {(() => {
                     // Obliczanie danych do wyświetlenia
                     const zupyIds = getEffectiveDayPlanIds(selectedDate, 'Zupy');
@@ -506,7 +506,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                         <div className="flex flex-col gap-8 col-start-1 row-start-1">
                           <div className="relative">
                             <h3 className="text-4xl mb-4 text-white text-center opacity-90 font-serif tracking-wider font-bold">Zupy</h3>
-                            <ul className={`space-y-2 font-sans font-light tracking-wide pl-4 ${fontClass}`}>
+                            <ul className={`space-y-2 font-sans font-light tracking-wide pl-2 ${fontClass}`}>
                               {zupyIds.map(id => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
@@ -534,7 +534,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                             <h3 className="text-4xl text-white mb-2 tracking-wider drop-shadow-lg font-serif font-bold">Dania</h3>
                           </div>
 
-                          <ul className={`w-full space-y-2 px-4 font-sans font-light tracking-wide ${fontClass}`}>
+                          <ul className={`w-full space-y-2 px-2 font-sans font-light tracking-wide ${fontClass}`}>
                             {daniaIds.map(id => {
                               const item = availableDishes.find(i => i.id === id);
                               if (!item) return null;
@@ -557,7 +557,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                         <div className="flex flex-col gap-8 col-start-3 row-start-1">
                           <div className="relative">
                             <h3 className="text-4xl mb-4 text-white text-center opacity-90 font-serif tracking-wider font-bold">Pierogi</h3>
-                            <ul className={`space-y-2 font-sans font-light tracking-wide pr-4 ${fontClass}`}>
+                            <ul className={`space-y-2 font-sans font-light tracking-wide pr-2 ${fontClass}`}>
                               {pierogiIds.map(id => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
@@ -581,7 +581,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                         <div className="flex flex-col gap-8 col-start-1 row-start-2">
                           <div className="relative">
                             <h3 className="text-4xl mb-4 text-white text-center opacity-90 font-serif tracking-wider font-bold">Dodatki</h3>
-                            <ul className={`space-y-2 font-sans font-light tracking-wide pl-4 ${fontClass}`}>
+                            <ul className={`space-y-2 font-sans font-light tracking-wide pl-2 ${fontClass}`}>
                               {dodatkiIds.map(id => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
@@ -605,7 +605,7 @@ const Menu: React.FC<MenuProps> = ({ apiEndpoint, mode }) => {
                         <div className="flex flex-col gap-8 col-start-3 row-start-2">
                           <div className="relative">
                             <h3 className="text-4xl mb-4 text-white text-center opacity-90 font-serif tracking-wider font-bold">Sałatki</h3>
-                            <ul className={`space-y-2 font-sans font-light tracking-wide pr-4 ${fontClass}`}>
+                            <ul className={`space-y-2 font-sans font-light tracking-wide pr-2 ${fontClass}`}>
                               {salatkiIds.map(id => {
                                 const item = availableDishes.find(i => i.id === id);
                                 if (!item) return null;
