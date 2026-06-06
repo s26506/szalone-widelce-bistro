@@ -41,7 +41,13 @@ const safeReadJSON = (filePath, defaultValue) => {
 };
 
 const safeWriteJSON = (filePath, data) => {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    try {
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+        return true;
+    } catch (e) {
+        console.error(`Error writing to ${filePath}:`, e);
+        return false;
+    }
 };
 
 // 1. Planner API
@@ -53,8 +59,11 @@ app.get('/api/planner', (req, res) => {
 });
 
 app.post('/api/planner', (req, res) => {
-    safeWriteJSON(plannerPath, req.body);
-    res.json({ success: true });
+    if (safeWriteJSON(plannerPath, req.body)) {
+        res.json({ success: true });
+    } else {
+        res.status(500).json({ error: 'Failed to write planner file. Check write permissions.' });
+    }
 });
 
 // 2. Subscription Planner API
@@ -66,8 +75,11 @@ app.get('/api/subscription-planner', (req, res) => {
 });
 
 app.post('/api/subscription-planner', (req, res) => {
-    safeWriteJSON(subPlannerPath, req.body);
-    res.json({ success: true });
+    if (safeWriteJSON(subPlannerPath, req.body)) {
+        res.json({ success: true });
+    } else {
+        res.status(500).json({ error: 'Failed to write subscription planner file. Check write permissions.' });
+    }
 });
 
 // 2.5 Board Planner API
@@ -77,8 +89,11 @@ app.get('/api/board-planner', (req, res) => {
     res.json(data);
 });
 app.post('/api/board-planner', (req, res) => {
-    safeWriteJSON(boardPlannerPath, req.body);
-    res.json({ success: true });
+    if (safeWriteJSON(boardPlannerPath, req.body)) {
+        res.json({ success: true });
+    } else {
+        res.status(500).json({ error: 'Failed to write board planner file. Check write permissions.' });
+    }
 });
 
 // 3. Menu API
@@ -113,9 +128,11 @@ app.post('/api/menu', (req, res) => {
         }
 
         items.push(newItem);
-        safeWriteJSON(menuPath, items);
-
-        res.json({ success: true, item: newItem });
+        if (safeWriteJSON(menuPath, items)) {
+            res.json({ success: true, item: newItem });
+        } else {
+            res.status(500).json({ error: 'Failed to save item. Check write permissions.' });
+        }
     } catch (e) {
         res.status(500).json({ error: 'Failed to save item' });
     }
@@ -142,8 +159,11 @@ app.put('/api/menu', (req, res) => {
                 items[index].name = capitalizeName(items[index].name);
             }
 
-            safeWriteJSON(menuPath, items);
-            res.json({ success: true, item: items[index] });
+            if (safeWriteJSON(menuPath, items)) {
+                res.json({ success: true, item: items[index] });
+            } else {
+                res.status(500).json({ error: 'Failed to update item. Check write permissions.' });
+            }
         } else {
             res.status(404).json({ error: 'Item not found' });
         }
@@ -163,8 +183,11 @@ app.delete('/api/menu', (req, res) => {
     items = items.filter(i => i.id !== id);
 
     if (items.length !== initialLength) {
-        safeWriteJSON(menuPath, items);
-        res.json({ success: true });
+        if (safeWriteJSON(menuPath, items)) {
+            res.json({ success: true });
+        } else {
+            res.status(500).json({ error: 'Failed to delete item. Check write permissions.' });
+        }
     } else {
         res.status(404).json({ error: 'Item not found' });
     }
@@ -193,8 +216,11 @@ app.post('/api/menu/reorder', (req, res) => {
             return item;
         });
 
-        safeWriteJSON(menuPath, items);
-        res.json({ success: true });
+        if (safeWriteJSON(menuPath, items)) {
+            res.json({ success: true });
+        } else {
+            res.status(500).json({ error: 'Failed to reorder items. Check write permissions.' });
+        }
     } catch (e) {
         console.error('Reorder error:', e);
         res.status(500).json({ error: 'Failed to reorder' });
