@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = path.join(__dirname, 'data');
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 // --- SECURITY OPTION ---
 // Uncomment to enable password protection
 /*
